@@ -18,8 +18,8 @@ public class MachineManager {
         ArrayList<String> registered = new ArrayList<>();
 
         // Add all machines (all the ones that can be spawned by location)
-        registered.add("PumpkinDropper");
-        registered.add("RespawnBeacon");
+        registered.add("CoinDropper");
+        registered.add("PresentReceiver");
         registered.add("ItemShop");
 
         for (String s : registered) {
@@ -32,14 +32,15 @@ public class MachineManager {
 
     }
 
-    public Machine getMachine(String name) {
+    public ArrayList<Machine> getMachines(Class<?> clazz) {
+        final var toReturn = new ArrayList<Machine>();
         for (Machine machine : machines) {
-            if (machine.getClass().getSimpleName().equalsIgnoreCase(name)) {
-                return machine;
+            if (machine.getClass().getSimpleName().equals(clazz.getSimpleName())) {
+                toReturn.add(machine);
             }
         }
 
-        return null;
+        return toReturn;
     }
 
     public Machine getMachine(Location location) {
@@ -70,7 +71,7 @@ public class MachineManager {
 
     public Machine newMachineByLocation(String name, Location location) {
         return switch (name) {
-            case "PumpkinDropper" -> new PumpkinDropper(location, false);
+            case "PumpkinDropper" -> new CoinDropper(location, false);
             case "ItemShop" -> new ItemShop(location);
             default -> null;
         };
@@ -78,8 +79,7 @@ public class MachineManager {
 
     public Machine newMachineByMaterial(Material material, Location location) {
         return switch (material) {
-            case Material.PUMPKIN -> new PumpkinDropper(location, true);
-            case Material.BEACON -> new TorchDropper(location);
+            case Material.PUMPKIN -> new CoinDropper(location, true);
             case Material.RED_WOOL -> new BeetrootDropper(location);
             case Material.BREWING_STAND -> new Brewer(location);
             case Material.REDSTONE_LAMP -> new RocketDropper(location);

@@ -1,20 +1,19 @@
 package com.liphium.elfhunt.game.state;
 
-import com.liphium.core.particle.ParticleBuilder;
+import com.liphium.core.Core;
 import com.liphium.core.util.ItemStackBuilder;
 import com.liphium.elfhunt.Elfhunt;
 import com.liphium.elfhunt.game.GameState;
 import com.liphium.elfhunt.game.team.Team;
 import com.liphium.elfhunt.game.team.impl.HunterTeam;
-import com.liphium.elfhunt.game.team.impl.ElfTeam;
 import com.liphium.elfhunt.listener.machines.impl.ItemShop;
 import com.liphium.elfhunt.screens.ItemShopScreen;
 import com.liphium.elfhunt.util.LocationAPI;
+import com.liphium.elfhunt.util.Messages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -33,24 +32,23 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 public class IngameState extends GameState {
-
-    private final ParticleBuilder beetroot;
-
-    private final ArrayList<BeetrootData> beetroots = new ArrayList<>();
     private final ArrayList<DroppableTrap> traps = new ArrayList<>();
 
     private Runnable runnable;
 
     public IngameState() {
         super("In game", 30);
-
-        beetroot = new ParticleBuilder().withColor(Color.PURPLE);
     }
 
+    private int presentsLeft = 0;
     private final HashMap<Location, Boolean> placedBlocks = new HashMap<>();
 
     @Override
     public void start() {
+
+        // Change the amount of presents based on team size
+        final var hunterSize = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam("Elves").getPlayers().size();
+        presentsLeft = hunterSize * 10; // 10 per member of the team seems fine for 15 minutes
 
         Objects.requireNonNull(LocationAPI.getLocation("Camp")).getWorld().setDifficulty(Difficulty.HARD);
 
@@ -65,6 +63,7 @@ public class IngameState extends GameState {
 
         Elfhunt.getInstance().getTaskManager().inject(runnable = new Runnable() {
             int tickCount = 0;
+            int countdown = 20 * 60 * 15; // 15 minutes in ticks
 
             @Override
             public void run() {
@@ -73,26 +72,23 @@ public class IngameState extends GameState {
 
                 if (tickCount++ >= 20) {
                     tickCount = 0;
-
-                    ArrayList<BeetrootData> toRemove = new ArrayList<>();
-
-                    for (BeetrootData data : beetroots) {
-                        if (data.start + 60000 <= System.currentTimeMillis()) {
-                            data.item.remove();
-                            toRemove.add(data);
-                        }
-
-                        for (Player all : Bukkit.getOnlinePlayers()) {
-                            beetroot.renderCircle(all, data.location.clone().add(0, 0.3, 0), 3);
-                        }
-                    }
-
-                    for (BeetrootData rem : toRemove) {
-                        beetroots.remove(rem);
-                    }
                 }
+
+                Messages.actionBar(Elfhunt.PREFIX
+                        .append(Component.text(formatTicks(countdown))).appendSpace()
+                        .append(Component.text("left", NamedTextColor.GREEN, TextDecoration.BOLD)));
+
+                countdown--;
             }
         });
+    }
+
+    private String formatTicks(int ticks) {
+        int totalSeconds = ticks / 20; // 20 ticks = 1 second
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+
+        return String.format("§a%02d§7:§a%02d", minutes, seconds);
     }
 
     private boolean placeItemShop = false;
@@ -130,10 +126,7 @@ public class IngameState extends GameState {
         if (event.getItem() != null) {
             Team team = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(event.getPlayer());
             ItemStack usedItem = event.getItem();
-            if (usedItem.getType().equals(Material.BEETROOT) && event.getClickedBlock() != null) {
-                beetroots.add(new BeetrootData(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5)));
-                reduceMainHandItem(event.getPlayer());
-            } else if (usedItem.getType().equals(Material.TRIPWIRE_HOOK) && event.getClickedBlock() != null) {
+            if (usedItem.getType().equals(Material.TRIPWIRE_HOOK) && event.getClickedBlock() != null) {
                 traps.add(new SlowTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
                 reduceMainHandItem(event.getPlayer());
             } else if (usedItem.getType().equals(Material.GLOWSTONE_DUST) && event.getClickedBlock() != null) {
@@ -246,14 +239,12 @@ public class IngameState extends GameState {
 
     @Override
     public void onDeath(PlayerDeathEvent event) {
-        event.setKeepInventory(true);
-        event.setDeathMessage(null);
-        event.setKeepLevel(true);
-        handleDeath(event.getEntity());
-    }
+        final var player = event.getPlayer();
 
-    @Override
-    public void handleDeath(Player player) {
+        event.setKeepInventory(true);
+        event.deathMessage(null);
+        event.setKeepLevel(true);
+
         player.setGameMode(GameMode.SPECTATOR);
 
         if (player.getKiller() != null) {
@@ -261,17 +252,20 @@ public class IngameState extends GameState {
         } else
             Bukkit.broadcast(Elfhunt.PREFIX.append(Component.text("§c§l" + player.getKiller().getName() + " §7died!")));
 
-        player.getInventory().clear();
-        player.setHealth(20);
-        player.spigot().respawn();
-        player.getInventory().clear();
-
-        Team team = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(player);
-        team.getPlayers().remove(player);
-
-        if (team.getPlayers().isEmpty()) {
-            handleWin(Elfhunt.getInstance().getGameManager().getTeamManager().getTeam("Humans"));
-        }
+        Elfhunt.getInstance().getTaskManager().inject(new Runnable() {
+            int tickCount = 0;
+            @Override
+            public void run() {
+                if(tickCount++ >= 1) {
+                    if(player.isDead()) {
+                        player.spigot().respawn();
+                        player.getInventory().clear();
+                        player.setHealth(20);
+                    }
+                    Elfhunt.getInstance().getTaskManager().uninject(this);
+                }
+            }
+        });
     }
 
     public void handleWin(Team team) {

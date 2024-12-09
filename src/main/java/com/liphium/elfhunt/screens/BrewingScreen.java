@@ -22,7 +22,7 @@ public class BrewingScreen extends CScreen {
         PotionType[] potions = new PotionType[]{
                 PotionType.SWIFTNESS,
                 PotionType.STRONG_LEAPING,
-                PotionType.INVISIBILITY,
+                PotionType.LONG_REGENERATION,
         };
 
         // 9 10 11 12 13 14 15 16 17

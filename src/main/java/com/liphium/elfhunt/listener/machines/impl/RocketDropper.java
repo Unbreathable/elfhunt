@@ -65,11 +65,6 @@ public class RocketDropper extends Machine {
     }
 
     @Override
-    public void onBreak() {
-        stand.customName(Component.text("Destroyed", NamedTextColor.RED, TextDecoration.ITALIC));
-    }
-
-    @Override
     public void destroy() {
         stand.remove();
     }

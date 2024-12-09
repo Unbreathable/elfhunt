@@ -23,17 +23,6 @@ public class Machine {
         return location;
     }
 
-    public void setBroken(boolean broken) {
-        this.broken = broken;
-    }
-
-    public boolean isBroken() {
-        return broken;
-    }
-
-    public void onBreak() {
-    }
-
     public void tick() {
     }
 

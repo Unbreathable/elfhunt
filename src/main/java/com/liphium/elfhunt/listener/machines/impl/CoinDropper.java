@@ -13,11 +13,11 @@ import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-public class PumpkinDropper extends Machine {
+public class CoinDropper extends Machine {
 
     private final ArmorStand stand;
 
-    public PumpkinDropper(Location location, boolean breakable) {
+    public CoinDropper(Location location, boolean breakable) {
         super(location, breakable);
 
         if (breakable) {
@@ -27,7 +27,7 @@ public class PumpkinDropper extends Machine {
         }
 
         stand.setCustomNameVisible(true);
-        stand.customName(Component.text("Pumpkins", NamedTextColor.GOLD).appendSpace()
+        stand.customName(Component.text("Coins", NamedTextColor.GOLD).appendSpace()
                 .append(Component.text("are produced here.", NamedTextColor.GRAY)));
         stand.setGravity(false);
         stand.setInvisible(true);
@@ -45,8 +45,8 @@ public class PumpkinDropper extends Machine {
             tickCount = 0;
 
             count--;
-            stand.customName(Component.text("Pumpkin ", NamedTextColor.GOLD)
-                    .append(Component.text("in ", NamedTextColor.GRAY))
+            stand.customName(Component.text("Coin", NamedTextColor.GOLD).appendSpace()
+                    .append(Component.text("in", NamedTextColor.GRAY)).appendSpace()
                     .append(Component.text(count, NamedTextColor.GOLD, TextDecoration.BOLD))
                     .append(Component.text("..", NamedTextColor.GRAY))
             );
@@ -55,12 +55,12 @@ public class PumpkinDropper extends Machine {
                 count = computeCount();
 
                 // Drop the pumpkin where the machine is located
-                ItemStack pumpkin = new ItemStackBuilder(Material.CARVED_PUMPKIN).buildStack();
+                ItemStack coin = new ItemStackBuilder(Material.GOLD_NUGGET).buildStack();
                 Item item;
                 if (isBreakable()) {
-                    item = location.getWorld().dropItem(location.clone().add(0.5, 1.5, 0.5), pumpkin);
+                    item = location.getWorld().dropItem(location.clone().add(0.5, 1.5, 0.5), coin);
                 } else {
-                    item = location.getWorld().dropItem(location, pumpkin);
+                    item = location.getWorld().dropItem(location, coin);
                 }
                 item.setVelocity(new Vector());
             }
@@ -69,11 +69,6 @@ public class PumpkinDropper extends Machine {
 
     int computeCount() {
         return Math.max(17 - Bukkit.getOnlinePlayers().size(), 5);
-    }
-
-    @Override
-    public void onBreak() {
-        stand.customName(Component.text("Destroyed", NamedTextColor.RED, TextDecoration.ITALIC));
     }
 
     @Override
