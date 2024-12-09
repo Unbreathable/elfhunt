@@ -1,3 +1,3 @@
-## Vampires: An event game mode
+## Elfhunt: An event game mode
 
-This is an event game mode for made for an event with me and my friends. Most of the code is just thrown together and there will likely be a lot of bugs. But that's just the nature of these events. You can download a full server template with everything set up directly from Releases. Have fun!
+This is an event game mode made for a private event. Please expect bugs and issues if you try it out. Once the event has been held, a server, together with the map, will be uploaded to the Releases page here on GitHub. Please download the server if you want to try out this game for yourself and I hope you have fun with it!

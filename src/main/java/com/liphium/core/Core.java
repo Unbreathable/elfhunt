@@ -2,8 +2,7 @@ package com.liphium.core;
 
 import com.liphium.core.inventory.Screens;
 import com.liphium.core.listener.InventoryListener;
-import com.liphium.vampires.Vampires;
-import org.bukkit.Bukkit;
+import com.liphium.elfhunt.Elfhunt;
 import org.bukkit.event.Listener;
 
 import java.util.Arrays;
@@ -23,7 +22,7 @@ public class Core {
 
         System.out.println("Initializing listeners..");
         Listener[] listeners = new Listener[]{new InventoryListener()};
-        Arrays.stream(listeners).forEach(listener -> Vampires.getInstance().getServer().getPluginManager().registerEvents(listener, Vampires.getInstance()));
+        Arrays.stream(listeners).forEach(listener -> Elfhunt.getInstance().getServer().getPluginManager().registerEvents(listener, Elfhunt.getInstance()));
 
         System.out.println(" ");
     }
