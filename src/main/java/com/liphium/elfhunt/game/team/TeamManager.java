@@ -1,7 +1,7 @@
 package com.liphium.elfhunt.game.team;
 
-import com.liphium.elfhunt.game.team.impl.HumanTeam;
-import com.liphium.elfhunt.game.team.impl.VampireTeam;
+import com.liphium.elfhunt.game.team.impl.HunterTeam;
+import com.liphium.elfhunt.game.team.impl.ElfTeam;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -13,8 +13,8 @@ public class TeamManager {
     public TeamManager() {
 
         // Register teams
-        teams.add(new VampireTeam());
-        teams.add(new HumanTeam());
+        teams.add(new ElfTeam());
+        teams.add(new HunterTeam());
     }
 
     public Team getTeam(String name) {

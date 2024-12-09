@@ -18,10 +18,10 @@ import java.time.Duration;
 import java.util.Objects;
 
 
-public class HumanTeam extends Team {
+public class HunterTeam extends Team {
 
-    public HumanTeam() {
-        super("Humans", "§a§l", Material.GRASS_BLOCK);
+    public HunterTeam() {
+        super("Hunters", "§c§l", Material.IRON_SWORD);
     }
 
     @Override
@@ -43,12 +43,12 @@ public class HumanTeam extends Team {
     public void sendStartMessage() {
         for (Player player : getPlayers()) {
 
-            player.sendMessage(" ");
-            player.sendMessage("    §7You are a §c§lhuman§7!");
-            player.sendMessage(" ");
-            player.sendMessage("§7Eliminate all §cvampires §7and free your");
-            player.sendMessage("§cimprisoned §7comrads.");
-            player.sendMessage(" ");
+            player.sendMessage(Component.text(" "));
+            player.sendMessage(Component.text("    §7You are a §a§lhunter§7!"));
+            player.sendMessage(Component.text(" "));
+            player.sendMessage(Component.text("§7Prevent the §aelves §7from giving out"));
+            player.sendMessage(Component.text("§apresents §7and be happy about it."));
+            player.sendMessage(Component.text(" "));
 
         }
     }
@@ -57,10 +57,10 @@ public class HumanTeam extends Team {
     public void handleWin() {
 
         Bukkit.broadcast(Component.text(" "));
-        Bukkit.broadcast(Component.text("   §aThe §a§lhumans §7won the §agame§7!"));
+        Bukkit.broadcast(Component.text("   §aThe §c§lHunters §7won the §agame§7!"));
         Bukkit.broadcast(Component.text(" "));
-        Bukkit.broadcast(Component.text("§7The world has been §asaved §7by the §ahumans"));
-        Bukkit.broadcast(Component.text("§7and can §aexist §7for another day."));
+        Bukkit.broadcast(Component.text("§7The §celves §7weren't able to hand out all"));
+        Bukkit.broadcast(Component.text("§cpresents §7in time. What a shame!"));
         Bukkit.broadcast(Component.text(" "));
 
         for (Player player : getPlayers()) {

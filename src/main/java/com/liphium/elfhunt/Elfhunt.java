@@ -21,7 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Elfhunt extends JavaPlugin {
     public static final Component PREFIX = Component.text("[", NamedTextColor.DARK_GRAY)
-            .append(Component.text("Vampires", NamedTextColor.RED))
+            .append(Component.text("Elfhunt", NamedTextColor.GREEN))
             .append(Component.text("]", NamedTextColor.DARK_GRAY))
             .append(Component.text(" "));
 
@@ -42,7 +42,7 @@ public final class Elfhunt extends JavaPlugin {
         // Initialize multiverse core and stuff
         core = (MultiverseCore) getServer().getPluginManager().getPlugin("Multiverse-Core");
         assert core != null;
-        core.cloneWorld("world", "vampires", "");
+        core.cloneWorld("world", "elfhunt", "");
 
         taskManager = new TaskManager();
         taskManager.initTask();
@@ -68,7 +68,7 @@ public final class Elfhunt extends JavaPlugin {
             machine.destroy();
         }
 
-        core.deleteWorld("vampires");
+        core.deleteWorld("elfhunt");
     }
 
     public GameManager getGameManager() {

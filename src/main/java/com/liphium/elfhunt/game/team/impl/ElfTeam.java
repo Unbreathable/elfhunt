@@ -14,12 +14,10 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class VampireTeam extends Team {
+public class ElfTeam extends Team {
 
-    public final HashMap<Player, Integer> bloodLevel = new HashMap<>();
-
-    public VampireTeam() {
-        super("Vampires", "§c§l", Material.REDSTONE);
+    public ElfTeam() {
+        super("Elves", "§a§l", Material.SPRUCE_SAPLING);
     }
 
     @Override
@@ -61,14 +59,12 @@ public class VampireTeam extends Team {
     public void sendStartMessage() {
         for (Player player : getPlayers()) {
 
-            player.sendMessage(" ");
-            player.sendMessage("    §7You are a §c§lvampire§7!");
-            player.sendMessage(" ");
-            player.sendMessage("§7Get all §chumans §7into §7the §ccell");
-            player.sendMessage("§7before you are §celiminated§7.");
-            player.sendMessage(" ");
-
-            bloodLevel.put(player, ThreadLocalRandom.current().nextInt(50, 60));
+            player.sendMessage(Component.text(" "));
+            player.sendMessage(Component.text("    §7You are an §a§lelf§7!"));
+            player.sendMessage(Component.text(" "));
+            player.sendMessage(Component.text("§7Deliver all §apresents §7into town and"));
+            player.sendMessage(Component.text("§7make sure §aeveryone §7gets one."));
+            player.sendMessage(Component.text(" "));
         }
     }
 
@@ -76,7 +72,7 @@ public class VampireTeam extends Team {
     public void handleWin() {
 
         Bukkit.broadcast(Component.text(" "));
-        Bukkit.broadcast(Component.text("   §cThe §c§lvampires §7won the §cgame§7!"));
+        Bukkit.broadcast(Component.text("   §cThe §a§lElves §7won the §cgame§7!"));
         Bukkit.broadcast(Component.text(" "));
         Bukkit.broadcast(Component.text("§7All §chumans §7were imprisoned and the §cvampires"));
         Bukkit.broadcast(Component.text("§7took over the §cworld§7!"));

@@ -5,8 +5,8 @@ import com.liphium.core.util.ItemStackBuilder;
 import com.liphium.elfhunt.Elfhunt;
 import com.liphium.elfhunt.game.GameState;
 import com.liphium.elfhunt.game.team.Team;
-import com.liphium.elfhunt.game.team.impl.HumanTeam;
-import com.liphium.elfhunt.game.team.impl.VampireTeam;
+import com.liphium.elfhunt.game.team.impl.HunterTeam;
+import com.liphium.elfhunt.game.team.impl.ElfTeam;
 import com.liphium.elfhunt.listener.machines.impl.ItemShop;
 import com.liphium.elfhunt.screens.ItemShopScreen;
 import com.liphium.elfhunt.util.LocationAPI;
@@ -30,13 +30,11 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class IngameState extends GameState {
 
-    private final ParticleBuilder builder, beetroot;
+    private final ParticleBuilder beetroot;
 
     private final ArrayList<BeetrootData> beetroots = new ArrayList<>();
     private final ArrayList<DroppableTrap> traps = new ArrayList<>();
@@ -46,16 +44,10 @@ public class IngameState extends GameState {
     public IngameState() {
         super("In game", 30);
 
-        builder = new ParticleBuilder().withColor(Color.RED).withSize(4.0f);
         beetroot = new ParticleBuilder().withColor(Color.PURPLE);
     }
 
-    public final ArrayList<Player> infected = new ArrayList<>(), prison = new ArrayList<>();
-
-    private final ArrayList<Block> torches = new ArrayList<>();
-
-    // Config
-    private int escapeDistance = 20;
+    private final HashMap<Location, Boolean> placedBlocks = new HashMap<>();
 
     @Override
     public void start() {
@@ -81,18 +73,6 @@ public class IngameState extends GameState {
 
                 if (tickCount++ >= 20) {
                     tickCount = 0;
-
-                    if (prison.size() >= Elfhunt.getInstance().getGameManager().getTeamManager().getTeam("Humans").getPlayers().size()) {
-                        handleWin(Elfhunt.getInstance().getGameManager().getTeamManager().getTeam("Vampires"));
-                    }
-
-                    for (Player player : infected) {
-                        player.sendActionBar(Component.text("§7You are §c§linfected§7!"));
-
-                        for (Player all : Bukkit.getOnlinePlayers()) {
-                            builder.renderPoint(all, player.getLocation().clone().add(0, 2.6, 0));
-                        }
-                    }
 
                     ArrayList<BeetrootData> toRemove = new ArrayList<>();
 
@@ -184,66 +164,14 @@ public class IngameState extends GameState {
     }
 
     @Override
-    public void onFirework(FireworkExplodeEvent event) {
-
-        ArrayList<Block> toRemove = new ArrayList<>();
-        for (Block torch : torches) {
-            if (torch.getLocation().clone().add(0.5, 0.5, 0.5).distance(event.getEntity().getLocation()) <= 3) {
-                torch.setType(Material.AIR);
-                toRemove.add(torch);
-            }
-        }
-
-        for (Block block : toRemove) {
-            torches.remove(block);
-        }
-
-    }
-
-    @Override
     public void onMove(PlayerMoveEvent event) {
         if (event.getPlayer().getGameMode() == GameMode.SPECTATOR) {
             return;
         }
         Team team = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(event.getPlayer());
 
-        if (team instanceof VampireTeam) {
-
-            if (event.getPlayer().getLocation().getBlock().getLightFromBlocks() > 7) {
-                event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.POISON, 30, 2));
-            }
-
-            ArrayList<BeetrootData> toRemove = new ArrayList<>();
-
-            for (BeetrootData data : beetroots) {
-                if (data.location.distance(event.getPlayer().getLocation()) <= 3) {
-                    toRemove.add(data);
-
-                    event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100, 0));
-                    event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 0));
-                    break;
-                }
-            }
-
-            for (BeetrootData rem : toRemove) {
-                rem.item.remove();
-                beetroots.remove(rem);
-            }
-
-        } else if (team instanceof HumanTeam) {
-            final var cell = Objects.requireNonNull(LocationAPI.getLocation("Cell"));
-            if (prison.contains(event.getPlayer()) && event.getPlayer().getLocation().distance(cell) >= escapeDistance) {
-                prison.remove(event.getPlayer());
-                Bukkit.broadcast(Component.text(" "));
-                Bukkit.broadcast(Component.text("    §c" + event.getPlayer().getName() + " §c§lescaped §7the cell!"));
-                Bukkit.broadcast(Component.text(" "));
-                team.giveKit(event.getPlayer(), false);
-            }
-        }
-
-
+        // Check if they wandered into a trap
         ArrayList<DroppableTrap> toRemove = new ArrayList<>();
-
         for (DroppableTrap trap : traps) {
             if (trap.location.distance(event.getPlayer().getLocation()) <= 3 && !team.getName().equals(trap.team.getName())) {
                 toRemove.add(trap);
@@ -251,7 +179,6 @@ public class IngameState extends GameState {
                 break;
             }
         }
-
         for (DroppableTrap rem : toRemove) {
             rem.item.remove();
             traps.remove(rem);
@@ -264,52 +191,10 @@ public class IngameState extends GameState {
         if (event.getEntity() instanceof Player player) {
             Team team = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(player);
 
-            if (team instanceof HumanTeam) {
+            if (team instanceof HunterTeam) {
                 event.setDamage(0);
             }
         } else event.setCancelled(true);
-    }
-
-    @Override
-    public void onDamageByEntity(EntityDamageByEntityEvent event) {
-        if (event.getEntity() instanceof Player player && event.getDamager() instanceof Player damager) {
-
-            Team team = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(damager);
-            Team playerTeam = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(player);
-
-            final var heldItemMaterial = damager.getInventory().getItemInMainHand().getType();
-            if (damager.getCooldown(heldItemMaterial) > 0) {
-                event.setCancelled(true);
-                return;
-            }
-
-            if (team instanceof VampireTeam && damager.getInventory().getItemInMainHand().getType().equals(Material.STICK)
-                    && damager.getCooldown(Material.STICK) <= 0 && !prison.contains(player)
-                    && playerTeam instanceof HumanTeam) {
-
-                damager.setCooldown(Material.STICK, 400);
-
-                if (infected.contains(player)) {
-                    sendToPrison(player);
-                    return;
-                }
-
-                infected.add(player);
-                Bukkit.broadcast(Elfhunt.PREFIX.append(Component.text("§c" + player.getName() + " §7was §c§linfected§7!")));
-            }
-        }
-    }
-
-    void sendToPrison(Player player) {
-        player.getInventory().clear();
-        player.teleport(Objects.requireNonNull(LocationAPI.getLocation("Cell")));
-
-        Bukkit.broadcast(Component.text(" "));
-        Bukkit.broadcast(Component.text("    §c" + player.getName() + " §7was §c§lcaught§7!"));
-        Bukkit.broadcast(Component.text(" "));
-
-        prison.add(player);
-        infected.remove(player);
     }
 
     @Override
@@ -319,9 +204,6 @@ public class IngameState extends GameState {
             return;
         }
 
-        if (event.getBlockPlaced().getType().equals(Material.TORCH)) {
-            torches.add(event.getBlockPlaced());
-        }
 
         // Place a machine if it is one
         final var machine = Elfhunt.getInstance().getMachineManager().newMachineByMaterial(event.getBlockPlaced().getType(), event.getBlockPlaced().getLocation());
@@ -330,25 +212,36 @@ public class IngameState extends GameState {
         }
     }
 
-    final List<Material> unbreakableBlocks = List.of(Material.BLACKSTONE, Material.IRON_BARS, Material.IRON_DOOR, Material.MANGROVE_PLANKS,
-            Material.POLISHED_ANDESITE, Material.BLACK_GLAZED_TERRACOTTA, Material.POLISHED_BLACKSTONE_BRICKS, Material.CHISELED_POLISHED_BLACKSTONE,
-            Material.POLISHED_BLACKSTONE_BUTTON, Material.POLISHED_BLACKSTONE, Material.MANGROVE_SLAB);
+    final List<Material> grassTypes = Arrays.asList(
+            Material.TALL_GRASS, Material.SHORT_GRASS, Material.CORNFLOWER,
+            Material.DANDELION, Material.POPPY, Material.BLUE_ORCHID, Material.ALLIUM,
+            Material.AZURE_BLUET, Material.RED_TULIP, Material.ORANGE_TULIP,
+            Material.WHITE_TULIP, Material.PINK_TULIP, Material.OXEYE_DAISY, Material.SUNFLOWER,
+            Material.LILAC, Material.ROSE_BUSH, Material.PEONY,
+            Material.LILY_OF_THE_VALLEY, Material.WITHER_ROSE
+    );
 
     @Override
     public void onBreak(BlockBreakEvent event) {
-        if (event.getBlock().getType().equals(Material.TORCH)) {
+        if (Elfhunt.getInstance().getMachineManager().breakLocation(event.getBlock().getLocation())) {
             event.setDropItems(false);
-            torches.remove(event.getBlock());
             return;
         }
 
-        if (Elfhunt.getInstance().getMachineManager().breakLocation(event.getBlock().getLocation())) {
-            event.setDropItems(false);
+        // Only let placed blocks be broken again
+        if(placedBlocks.get(event.getBlock().getLocation()) != null) {
+            placedBlocks.remove(event.getBlock().getLocation());
+            return;
         }
 
-        if (unbreakableBlocks.contains(event.getBlock().getType())) {
-            event.setCancelled(true);
+        // Let grass blocks be removed permanently (for PvP)
+        if(grassTypes.contains(event.getBlock().getType())) {
+            event.setDropItems(false);
+            event.setCancelled(false);
+            return;
         }
+
+        event.setCancelled(true);
     }
 
     @Override
@@ -382,13 +275,6 @@ public class IngameState extends GameState {
     }
 
     public void handleWin(Team team) {
-
-        for (Block torch : torches) {
-            torch.setType(Material.AIR);
-        }
-
-        torches.clear();
-
         team.handleWin();
         Elfhunt.getInstance().getTaskManager().uninject(runnable);
         Elfhunt.getInstance().getGameManager().setCurrentState(new EndState());

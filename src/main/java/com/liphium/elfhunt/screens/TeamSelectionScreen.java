@@ -6,6 +6,7 @@ import com.liphium.core.inventory.CScreen;
 import com.liphium.core.util.ItemStackBuilder;
 import com.liphium.elfhunt.Elfhunt;
 import com.liphium.elfhunt.game.team.Team;
+import com.liphium.elfhunt.game.team.impl.HunterTeam;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -13,7 +14,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 public class TeamSelectionScreen extends CScreen {
 
     public TeamSelectionScreen() {
-        super(1, Component.text("Teams", NamedTextColor.RED, TextDecoration.BOLD), 3, true);
+        super(1, Component.text("Teams", NamedTextColor.GREEN, TextDecoration.BOLD), 3, true);
 
         background();
         rebuild();
@@ -22,7 +23,7 @@ public class TeamSelectionScreen extends CScreen {
     public void rebuild() {
         // 9 10 11 12 13 14 15 16 17
         for (Team team : Elfhunt.getInstance().getGameManager().getTeamManager().getTeams()) {
-            int slot = team.getName().equals("Vampires") ? 10 : 16;
+            int slot = team instanceof HunterTeam ? 10 : 16;
 
             setItem(slot, new CItem(new ItemStackBuilder(team.getMaterial()).withLore(team.playerLore())
                     .withName(Component.text(team.getCc() + team.getName())).buildStack())
