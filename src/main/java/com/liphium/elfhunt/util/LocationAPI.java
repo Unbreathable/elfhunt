@@ -23,7 +23,7 @@ public class LocationAPI {
     }
 
     /**
-     * Get a location by name in the vampires world
+     * Get a location by name in the elfhunt world
      *
      * @param locationName Name of the location in the config file
      * @return The location in the specified world
@@ -45,7 +45,7 @@ public class LocationAPI {
         Location location = Elfhunt.getInstance().getConfig().getLocation(locationName);
 
         if (location != null)
-            location.setWorld(Bukkit.getWorld("vampires"));
+            location.setWorld(Bukkit.getWorld("elfhunt"));
 
         // Cache the location for use in the future
         locations.put(locationName, location);

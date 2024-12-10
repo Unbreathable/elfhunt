@@ -5,8 +5,11 @@ import com.liphium.core.util.ItemStackBuilder;
 import com.liphium.elfhunt.Elfhunt;
 import com.liphium.elfhunt.game.GameState;
 import com.liphium.elfhunt.game.team.Team;
+import com.liphium.elfhunt.game.team.impl.ElfTeam;
 import com.liphium.elfhunt.game.team.impl.HunterTeam;
+import com.liphium.elfhunt.listener.machines.MachineManager;
 import com.liphium.elfhunt.listener.machines.impl.ItemShop;
+import com.liphium.elfhunt.listener.machines.impl.PresentReceiver;
 import com.liphium.elfhunt.screens.ItemShopScreen;
 import com.liphium.elfhunt.util.LocationAPI;
 import com.liphium.elfhunt.util.Messages;
@@ -41,6 +44,7 @@ public class IngameState extends GameState {
     }
 
     private int presentsLeft = 0;
+    private final HashMap<String, PresentReceiver> receivers = new HashMap<>();
     private final HashMap<Location, Boolean> placedBlocks = new HashMap<>();
 
     @Override
@@ -50,7 +54,15 @@ public class IngameState extends GameState {
         final var hunterSize = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam("Elves").getPlayers().size();
         presentsLeft = hunterSize * 10; // 10 per member of the team seems fine for 15 minutes
 
-        Objects.requireNonNull(LocationAPI.getLocation("Camp")).getWorld().setDifficulty(Difficulty.HARD);
+        // Give every single present receiver a random name
+        for(PresentReceiver receiver : Elfhunt.getInstance().getMachineManager().getMachines(PresentReceiver.class)) {
+            var name = PresentReceiver.randomName();
+            while(receivers.containsKey(name)) {
+                name = PresentReceiver.randomName();
+            }
+            receiver.assignName(name);
+            receivers.put(name, receiver);
+        }
 
         for (Team team : Elfhunt.getInstance().getGameManager().getTeamManager().getTeams()) {
             team.sendStartMessage();
@@ -153,6 +165,12 @@ public class IngameState extends GameState {
 
         if (event.getRightClicked().getType().equals(EntityType.ARMOR_STAND)) {
             event.setCancelled(true);
+        }
+    }
+
+    void onReceiverClicked(Player player, String name) {
+        if(Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(player) instanceof ElfTeam) {
+
         }
     }
 

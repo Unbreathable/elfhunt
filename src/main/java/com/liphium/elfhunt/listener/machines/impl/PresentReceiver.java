@@ -17,18 +17,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 public class PresentReceiver extends Machine {
 
     private final ArmorStand stand;
-    private final ArrayList<String> names = new ArrayList<>(List.of(
+    private static final ArrayList<String> names = new ArrayList<>(List.of(
             "Julian", "Thorben", "Crash", "Jonas", "Shadow", "Tim",
             "Atlas", "Animo", "Louis", "Liph", "Ritso", "Glaze", "Jumbo",
             "JuliPvP99", "Night", "Maya", "Theo", "Prime", "Lofi Girl", "Alex",
             "Steve", "Arch", "Colin", "Dani", "Dave", "David", "Eric", "Lofi Boy",
             "Matt", "Elon Musk", "Linus LTT", "Neko"
     ));
+
+    /**
+     * Generate a random name for a present receiver.
+     * @return The random name
+     */
+    public static String randomName() {
+        return names.get(ThreadLocalRandom.current().nextInt(names.size() - 1));
+    }
+
+    // The name chosen for the stand (only once assigned)
+    String chosenName = "";
 
     public PresentReceiver(Location location) {
         super(location, false);
@@ -69,6 +81,15 @@ public class PresentReceiver extends Machine {
         stand.getEquipment().setChestplate(chestplate);
         stand.getEquipment().setLeggings(leggings);
         stand.getEquipment().setBoots(boots);
+    }
+
+    /**
+     * Change the name of the armor stand to the specified name.
+     * @param name Name to change to
+     */
+    public void assignName(String name) {
+        stand.customName(Component.text(name, NamedTextColor.WHITE, TextDecoration.BOLD));
+        chosenName = name;
     }
 
     @Override

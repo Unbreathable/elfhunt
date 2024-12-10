@@ -32,11 +32,11 @@ public class MachineManager {
 
     }
 
-    public ArrayList<Machine> getMachines(Class<?> clazz) {
-        final var toReturn = new ArrayList<Machine>();
+    public <T> ArrayList<T> getMachines(Class<T> clazz) {
+        final var toReturn = new ArrayList<T>();
         for (Machine machine : machines) {
             if (machine.getClass().getSimpleName().equals(clazz.getSimpleName())) {
-                toReturn.add(machine);
+                toReturn.add((T) machine);
             }
         }
 
