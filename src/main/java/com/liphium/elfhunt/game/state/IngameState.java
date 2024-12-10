@@ -33,6 +33,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class IngameState extends GameState {
     private final ArrayList<DroppableTrap> traps = new ArrayList<>();
@@ -46,13 +47,15 @@ public class IngameState extends GameState {
     private int presentsLeft = 0;
     private final HashMap<String, PresentReceiver> receivers = new HashMap<>();
     private final HashMap<Location, Boolean> placedBlocks = new HashMap<>();
+    private final HashMap<Player, String> currentDelivery = new HashMap<>();
 
     @Override
     public void start() {
 
         // Change the amount of presents based on team size
         final var hunterSize = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam("Elves").getPlayers().size();
-        presentsLeft = hunterSize * 10; // 10 per member of the team seems fine for 15 minutes
+        int maxPresents = hunterSize * 10; // 10 per member of the team seems fine for 15 minutes
+        presentsLeft = maxPresents;
 
         // Give every single present receiver a random name
         for(PresentReceiver receiver : Elfhunt.getInstance().getMachineManager().getMachines(PresentReceiver.class)) {
@@ -86,9 +89,17 @@ public class IngameState extends GameState {
                     tickCount = 0;
                 }
 
-                Messages.actionBar(Elfhunt.PREFIX
-                        .append(Component.text(formatTicks(countdown))).appendSpace()
-                        .append(Component.text("left", NamedTextColor.GREEN, TextDecoration.BOLD)));
+                Messages.actionBar(Component.text(maxPresents, NamedTextColor.GREEN)
+                        .append(Component.text("/", NamedTextColor.GRAY))
+                        .append(Component.text(presentsLeft, NamedTextColor.GREEN))
+                        .appendSpace()
+                        .append(Component.text("remaining", NamedTextColor.GRAY))
+                        .appendSpace()
+                        .append(Component.text("|", NamedTextColor.DARK_GRAY))
+                        .appendSpace()
+                        .append(Component.text(formatTicks(countdown)).appendSpace()
+                        .append(Component.text("left", NamedTextColor.GRAY)))
+                );
 
                 countdown--;
             }
@@ -168,9 +179,47 @@ public class IngameState extends GameState {
         }
     }
 
-    void onReceiverClicked(Player player, String name) {
-        if(Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(player) instanceof ElfTeam) {
+    private final ArrayList<String> messages = new ArrayList<>(List.of(
+            "§7How dare you deliver this to me? This present is for §a%player%§7!",
+            "§7Are you too stupid to read? The name on the present clearly says §a%player%§7!",
+            "§7Why are you giving me this? It’s clearly for §a%player%§7!",
+            "§7I don’t want this! This belongs to §a%player%§7!",
+            "§7Is there something wrong with your eyes? This is meant for §a%player%§7!",
+            "§7I’m not §a%player%§7! Take this to the right person!",
+            "§7Seriously? This is for §a%player%§7, not me!",
+            "§7You’ve got the wrong person! This is for §a%player%§7!",
+            "§7Don’t waste my time! This clearly says it’s for §a%player%§7!",
+            "§7I think you’re lost — this is meant for §a%player%§7!",
+            "§7Stop being careless! This is for §a%player%§7, not me!",
+            "§7Do I look like §a%player%§7 to you? Are you blind?",
+            "§7This isn’t mine — it’s for §a%player%§7!",
+            "§7Take a closer look. This belongs to §a%player%§7!",
+            "§7How can you mix this up? It’s clearly for §a%player%§7!",
+            "§7Not my name on the present—it’s §a%player%§7’s!",
+            "§7This isn’t funny. Give this to §a%player%§7!",
+            "§7Read the label! It’s for §a%player%§7!",
+            "§7Stop bothering me and give this to §a%player%§7!",
+            "§7I’m not the recipient! This is meant for §a%player%§7!",
+            "§7You’ve made a mistake—this belongs to §a%player%§7!",
+            "§7Clearly, you didn’t read the tag. This is for §a%player%§7!"
+    ));
 
+
+    public void onReceiverClicked(Player player, String name) {
+        if(Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(player) instanceof ElfTeam) {
+            if(Objects.equals(currentDelivery.get(player), name)) {
+                presentsLeft -= 1;
+                currentDelivery.remove(player);
+
+                // Send an announcement that a present has been delivered
+                Bukkit.broadcast(Component.text(" "));
+                Bukkit.broadcast(Component.text("§a§l" + player.getName() + " §7delivered a §apresent§7!"));
+                Bukkit.broadcast(Component.text(" "));
+            } else {
+                var message = messages.get(ThreadLocalRandom.current().nextInt(messages.size() - 1));
+                message = message.replace("%player%", player.getName());
+                player.sendMessage(Component.text("§f§l" + name + "§7: " + message));
+            }
         }
     }
 

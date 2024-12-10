@@ -1,6 +1,8 @@
 package com.liphium.elfhunt.listener.machines.impl;
 
 import com.liphium.core.Core;
+import com.liphium.elfhunt.Elfhunt;
+import com.liphium.elfhunt.game.state.IngameState;
 import com.liphium.elfhunt.listener.machines.Machine;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -95,6 +97,9 @@ public class PresentReceiver extends Machine {
     @Override
     public void onInteractAtEntity(PlayerInteractAtEntityEvent event) {
         if (event.getRightClicked().equals(stand)) {
+            if(Elfhunt.getInstance().getGameManager().getCurrentState() instanceof IngameState state) {
+                state.onReceiverClicked(event.getPlayer(), chosenName);
+            }
             Core.getInstance().getScreens().open(event.getPlayer(), 3);
             event.setCancelled(true);
         }
