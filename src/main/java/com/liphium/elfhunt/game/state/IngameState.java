@@ -197,7 +197,6 @@ public class IngameState extends GameState {
             return;
         }
 
-
         // Place a machine if it is one
         final var machine = Elfhunt.getInstance().getMachineManager().newMachineByMaterial(event.getBlockPlaced().getType(), event.getBlockPlaced().getLocation());
         if (machine != null) {

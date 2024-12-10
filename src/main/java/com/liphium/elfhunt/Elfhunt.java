@@ -68,7 +68,7 @@ public final class Elfhunt extends JavaPlugin {
             machine.destroy();
         }
 
-        core.deleteWorld("elfhunt");
+        core.deleteWorld("core");
     }
 
     public GameManager getGameManager() {
