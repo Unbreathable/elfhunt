@@ -35,7 +35,7 @@ public class LobbyState extends GameState {
     @Override
     public void start() {
 
-        Location location = LocationAPI.getLocation("Camp");
+        Location location = LocationAPI.getLocation("Elves");
         if (location != null && location.getWorld() != null) {
             location.getWorld().setTime(18000);
             location.getWorld().setThundering(false);
@@ -166,7 +166,7 @@ public class LobbyState extends GameState {
         player.getInventory().setItem(4, new ItemStackBuilder(Material.SADDLE).withName(Component.text("§c§lTeams §7(Right-click)"))
                 .withLore(Component.text("§7§oJoin a team.")).buildStack());
 
-        player.teleport(LocationAPI.getLocation("Camp"));
+        player.teleport(LocationAPI.getLocation("Elves"));
 
         Elfhunt.getInstance().getTaskManager().inject(new Runnable() {
             int ticks = 0;
@@ -174,7 +174,7 @@ public class LobbyState extends GameState {
             @Override
             public void run() {
                 if (ticks++ >= 10) {
-                    player.teleport(LocationAPI.getLocation("Camp"));
+                    player.teleport(LocationAPI.getLocation("Elves"));
                     Elfhunt.getInstance().getTaskManager().uninject(this);
                 }
             }

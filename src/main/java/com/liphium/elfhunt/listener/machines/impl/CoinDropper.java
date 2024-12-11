@@ -68,7 +68,7 @@ public class CoinDropper extends Machine {
     }
 
     int computeCount() {
-        return Math.max(17 - Bukkit.getOnlinePlayers().size(), 5);
+        return Math.max(10 - Bukkit.getOnlinePlayers().size(), 3);
     }
 
     @Override

@@ -94,44 +94,70 @@ public class ItemShopScreen extends CScreen {
                         .withLore(Component.text("Turrets and traps.", NamedTextColor.GRAY))
                         .buildStack(),
                 List.of(
-                        itemWithPrice(Material.TORCH, "Torch", NamedTextColor.GREEN, 4, 1),
-                        spacer(),
-                        itemWithPrice(Material.IRON_INGOT, "Iron ingot", NamedTextColor.GREEN, 5, 1),
-                        itemWithPrice(Material.DIAMOND, "Diamond", NamedTextColor.GREEN, 10, 1),
-                        itemWithPrice(Material.MACE, "Mace", NamedTextColor.WHITE, 25, 1),
-                        spacer(),
-                        itemWithPrice(Material.RED_WOOL, "Blood Garlic dropper", NamedTextColor.GREEN, 40, 1),
-                        itemWithPrice(Material.BEACON, "Torch dropper", NamedTextColor.GREEN, 50, 1)
+                        itemWithPrice(Material.TNT_MINECART, "TNT trap", NamedTextColor.GREEN, 25, 1),
+                        itemWithPrice(Material.TRIPWIRE_HOOK, "Slow trap", NamedTextColor.GREEN, 25, 1),
+                        itemWithPrice(Material.VINE, "Poison trap", NamedTextColor.GREEN, 25, 1)
                 )
         ),
         TOOLS(
-                new ItemStackBuilder(Material.IRON_PICKAXE)
-                        .withName(Component.text("Tools & weapons", NamedTextColor.WHITE, TextDecoration.BOLD))
-                        .withLore(Component.text("To aid you in the fight.", NamedTextColor.GRAY))
+                new ItemStackBuilder(Material.DIAMOND_PICKAXE)
+                        .withName(Component.text("Tools", NamedTextColor.AQUA, TextDecoration.BOLD))
+                        .withLore(Component.text("Shovels and pickaxes.", NamedTextColor.GRAY))
                         .buildStack(),
                 List.of(
-                        itemWithPrice(Material.IRON_SHOVEL, "Iron shovel", NamedTextColor.WHITE, 4, 1),
-                        itemWithPriceCustom(
-                                new ItemStackBuilder(Material.GOLDEN_SHOVEL)
-                                        .withName(Component.text("Golden shovel", NamedTextColor.WHITE))
-                                        .withEnchantments(Map.of(Enchantment.EFFICIENCY, 2))
-                                        .buildStack(), 10
+                        itemWithPriceCustom(new ItemStackBuilder(Material.GOLDEN_SHOVEL)
+                                .withName(Component.text("Golden shovel", NamedTextColor.AQUA))
+                                .withEnchantments(Map.of(Enchantment.EFFICIENCY, 5))
+                                .buildStack(), 15
+                        ),
+                        itemWithPriceCustom(new ItemStackBuilder(Material.DIAMOND_SHOVEL)
+                                .withName(Component.text("Diamond shovel", NamedTextColor.AQUA))
+                                .withEnchantments(Map.of(Enchantment.EFFICIENCY, 5))
+                                .buildStack(), 35
+                        ),
+                        spacer(),
+                        itemWithPriceCustom(new ItemStackBuilder(Material.GOLDEN_PICKAXE)
+                                .withName(Component.text("Golden pickaxe", NamedTextColor.AQUA))
+                                .withEnchantments(Map.of(Enchantment.EFFICIENCY, 5))
+                                .buildStack(), 15
+                        ),
+                        itemWithPriceCustom(new ItemStackBuilder(Material.DIAMOND_PICKAXE)
+                                .withName(Component.text("Diamond pickaxe", NamedTextColor.AQUA))
+                                .withEnchantments(Map.of(Enchantment.EFFICIENCY, 5))
+                                .buildStack(), 35
                         )
-                        //itemWithPrice(Material.WIND_CHARGE, "Wind charge", NamedTextColor.WHITE, 20, 5)
                 )
         ),
-        BUILDING(
-                new ItemStackBuilder(Material.STONE)
-                        .withName(Component.text("Building", NamedTextColor.GOLD, TextDecoration.BOLD))
-                        .withLore(Component.text("Upgrade your base.", NamedTextColor.GRAY))
+        ITEMS(
+                new ItemStackBuilder(Material.IRON_PICKAXE)
+                        .withName(Component.text("Items", NamedTextColor.WHITE, TextDecoration.BOLD))
+                        .withLore(Component.text("Blocks & materials.", NamedTextColor.GRAY))
                         .buildStack(),
                 List.of(
-                        itemWithPrice(Material.PUMPKIN, "Pumpkin dropper", NamedTextColor.GOLD, 25, 1),
-                        itemWithPrice(Material.BREWING_STAND, "Brewer", NamedTextColor.GOLD, 100, 1),
-                        itemWithPrice(Material.ARMOR_STAND, "Pop-up item shop", NamedTextColor.GOLD, 50, 1),
+                        itemWithPrice(Material.PACKED_ICE, "Ice", NamedTextColor.WHITE, 2, 16),
+                        itemWithPrice(Material.RED_WOOL, "Snow", NamedTextColor.WHITE, 4, 16),
+                        itemWithPrice(Material.SPRUCE_LOG, "Spruce wood", NamedTextColor.WHITE, 8, 4),
+                        itemWithPrice(Material.COBBLESTONE, "Cobblestone", NamedTextColor.WHITE, 8, 16),
                         spacer(),
-                        itemWithPrice(Material.TRIPWIRE_HOOK, "Alarm trap", NamedTextColor.GOLD, 20, 1),
-                        itemWithPrice(Material.GLOWSTONE_DUST, "Glow trap", NamedTextColor.GOLD, 30, 1)
+                        itemWithPrice(Material.IRON_INGOT, "Iron", NamedTextColor.WHITE, 4, 1),
+                        itemWithPrice(Material.DIAMOND, "Diamond", NamedTextColor.WHITE, 7, 1)
+                )
+        ),
+        DROPPER(
+                new ItemStackBuilder(Material.DROPPER)
+                        .withName(Component.text("Droppers", NamedTextColor.GOLD, TextDecoration.BOLD))
+                        .withLore(Component.text("Coin and material droppers.", NamedTextColor.GRAY))
+                        .buildStack(),
+                List.of(
+                        itemWithPrice(Material.GOLD_ORE, "Coin dropper", NamedTextColor.GOLD, 15, 1),
+                        itemWithPrice(Material.WHITE_CONCRETE, "Iron dropper", NamedTextColor.GOLD, 20, 1),
+                        itemWithPrice(Material.RED_CONCRETE, "Redstone dropper", NamedTextColor.GOLD, 20, 1),
+                        itemWithPrice(Material.CYAN_CONCRETE, "Diamond dropper", NamedTextColor.GOLD, 30, 1),
+                        itemWithPrice(Material.DISPENSER, "Dropper dropper", NamedTextColor.GOLD, 60, 1),
+                        itemWithPrice(Material.TARGET, "Arrow dropper", NamedTextColor.GOLD, 20, 1),
+                        itemWithPrice(Material.REDSTONE_LAMP, "Rocket dropper", NamedTextColor.GOLD, 20, 1),
+                        itemWithPrice(Material.BEACON, "Golden apple dropper", NamedTextColor.GOLD, 40, 1),
+                        itemWithPrice(Material.BREWING_STAND, "Brewer", NamedTextColor.GOLD, 40, 1)
                 )
         );
 
@@ -176,19 +202,19 @@ public class ItemShopScreen extends CScreen {
             // Get the amount of pumpkins in the inventory
             int count = 0;
             for (ItemStack item : event.getPlayer().getInventory()) {
-                if (item != null && item.getType() == Material.CARVED_PUMPKIN) {
+                if (item != null && item.getType() == Material.GOLD_NUGGET) {
                     count += item.getAmount();
                 }
             }
 
             if (count < price) {
-                event.getPlayer().sendMessage(Elfhunt.PREFIX.append(Component.text("You don't have enough pumpkins to purchase this item.", NamedTextColor.RED)));
+                event.getPlayer().sendMessage(Elfhunt.PREFIX.append(Component.text("You don't have enough coins to purchase this item.", NamedTextColor.RED)));
                 event.getPlayer().closeInventory();
                 return;
             }
 
             // Remove the pumpkins from the players inventory
-            removeAmountFromInventory(event.getPlayer(), Material.CARVED_PUMPKIN, price);
+            removeAmountFromInventory(event.getPlayer(), Material.GOLD_NUGGET, price);
 
             event.getPlayer().getInventory().addItem(stack);
         }

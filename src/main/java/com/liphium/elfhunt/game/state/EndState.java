@@ -16,6 +16,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+import java.util.Objects;
+
 public class EndState extends GameState {
 
     public EndState() {
@@ -27,7 +29,7 @@ public class EndState extends GameState {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.setGameMode(GameMode.SURVIVAL);
-            player.teleport(LocationAPI.getLocation("Camp"));
+            player.teleport(Objects.requireNonNull(LocationAPI.getLocation("Elves")));
 
             player.getInventory().clear();
             player.getInventory().setHelmet(null);

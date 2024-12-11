@@ -4,10 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.*;
 
 public abstract class GameState {
 
@@ -59,13 +56,13 @@ public abstract class GameState {
     public void onFirework(FireworkExplodeEvent event) {
     }
 
+    public void onRespawn(PlayerRespawnEvent event) {
+    }
+
     public void join(Player player) {
     }
 
     public void quit(Player player) {
-    }
-
-    public void handleDeath(Player player) {
     }
 
 }

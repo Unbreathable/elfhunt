@@ -27,6 +27,7 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -87,21 +88,28 @@ public class IngameState extends GameState {
 
                 if (tickCount++ >= 20) {
                     tickCount = 0;
+
+                    // Check if the win condition for the hunters is met
+                    if(countdown == 0) {
+                        handleWin(Elfhunt.getInstance().getGameManager().getTeamManager().getTeam("Hunters"));
+                        return;
+                    }
+
+                    Messages.actionBar(Component.text(maxPresents, NamedTextColor.GREEN)
+                            .append(Component.text("/", NamedTextColor.GRAY))
+                            .append(Component.text(presentsLeft, NamedTextColor.GREEN))
+                            .appendSpace()
+                            .append(Component.text("remaining", NamedTextColor.GRAY))
+                            .appendSpace()
+                            .append(Component.text("|", NamedTextColor.DARK_GRAY))
+                            .appendSpace()
+                            .append(Component.text(formatTicks(countdown)).appendSpace()
+                                    .append(Component.text("left", NamedTextColor.GRAY)))
+                    );
+
+                    countdown--;
                 }
 
-                Messages.actionBar(Component.text(maxPresents, NamedTextColor.GREEN)
-                        .append(Component.text("/", NamedTextColor.GRAY))
-                        .append(Component.text(presentsLeft, NamedTextColor.GREEN))
-                        .appendSpace()
-                        .append(Component.text("remaining", NamedTextColor.GRAY))
-                        .appendSpace()
-                        .append(Component.text("|", NamedTextColor.DARK_GRAY))
-                        .appendSpace()
-                        .append(Component.text(formatTicks(countdown)).appendSpace()
-                        .append(Component.text("left", NamedTextColor.GRAY)))
-                );
-
-                countdown--;
             }
         });
     }
@@ -206,7 +214,7 @@ public class IngameState extends GameState {
 
 
     public void onReceiverClicked(Player player, String name) {
-        if(Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(player) instanceof ElfTeam) {
+        if(Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(player) instanceof ElfTeam team) {
             if(Objects.equals(currentDelivery.get(player), name)) {
                 player.getInventory().remove(Material.RED_WOOL);
                 presentsLeft -= 1;
@@ -216,6 +224,11 @@ public class IngameState extends GameState {
                 Bukkit.broadcast(Component.text(" "));
                 Bukkit.broadcast(Component.text("§a§l" + player.getName() + " §7delivered a §apresent§7!"));
                 Bukkit.broadcast(Component.text(" "));
+
+                // Check if the win condition for the elves is met
+                if(presentsLeft <= 0) {
+                    handleWin(team);
+                }
             } else {
                 var message = messages.get(ThreadLocalRandom.current().nextInt(messages.size() - 1));
                 message = message.replace("%player%", player.getName());
@@ -357,6 +370,16 @@ public class IngameState extends GameState {
                 }
             }
         });
+    }
+
+    @Override
+    public void onRespawn(PlayerRespawnEvent event) {
+        final var team = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(event.getPlayer());
+        if(team instanceof HunterTeam) {
+            event.setRespawnLocation(Objects.requireNonNull(LocationAPI.getLocation("Hunters")));
+        } else {
+            event.setRespawnLocation(Objects.requireNonNull(LocationAPI.getLocation("Elves")));
+        }
     }
 
     public void handleWin(Team team) {

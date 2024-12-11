@@ -8,10 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.*;
 
 public class GameListener implements Listener {
 
@@ -76,6 +73,11 @@ public class GameListener implements Listener {
     @EventHandler
     public void onRocket(FireworkExplodeEvent event) {
         Elfhunt.getInstance().getGameManager().getCurrentState().onFirework(event);
+    }
+
+    @EventHandler
+    public void onRespawn(PlayerRespawnEvent event) {
+        Elfhunt.getInstance().getGameManager().getCurrentState().onRespawn(event);
     }
 
     @EventHandler
