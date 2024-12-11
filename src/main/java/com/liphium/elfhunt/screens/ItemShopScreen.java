@@ -27,19 +27,10 @@ public class ItemShopScreen extends CScreen {
     public void init(Player player, Inventory inventory) {
         background(player);
 
-        // Add the right categories for the player
-        List<ShopCategory> toOpen;
-        if (Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(player).getName().equals("Vampires")) {
-            toOpen = List.of(ShopCategory.VAMPIRES, ShopCategory.TOOLS, ShopCategory.BUILDING);
-        } else {
-            toOpen = List.of(ShopCategory.HUMANS, ShopCategory.TOOLS, ShopCategory.BUILDING);
-        }
-
         // Add all the categories
-        for (int i = 0; i < toOpen.size(); i++) {
-            int finalI = i;
-            setItemNotCached(player, 10 + i, new CItem(toOpen.get(i).getStack())
-                    .onClick(event -> openCategory(event, toOpen.get(finalI), inventory)));
+        for (ShopCategory category : ShopCategory.values()) {
+            setItemNotCached(player, 10 + category.ordinal(), new CItem(category.getStack())
+                    .onClick(event -> openCategory(event, category, inventory)));
         }
     }
 
@@ -69,26 +60,38 @@ public class ItemShopScreen extends CScreen {
     }
 
     public enum ShopCategory {
-        VAMPIRES(
-                new ItemStackBuilder(Material.REDSTONE)
-                        .withName(Component.text("Vampires", NamedTextColor.RED, TextDecoration.BOLD))
-                        .withLore(Component.text("Stuff to catch those pesky creatures.", NamedTextColor.GRAY))
+        WEAPONS(
+                new ItemStackBuilder(Material.IRON_SWORD)
+                        .withName(Component.text("Weapons", NamedTextColor.RED, TextDecoration.BOLD))
+                        .withLore(Component.text("Swords, bows, and more.", NamedTextColor.GRAY))
                         .buildStack(),
                 List.of(
-                        itemWithPrice(Material.FEATHER, "Dash", NamedTextColor.RED, 5, 1),
-                        spacer(),
-                        itemWithPrice(Material.LEATHER, "Leather", NamedTextColor.RED, 1, 1),
-                        itemWithPrice(Material.IRON_INGOT, "Iron ingot", NamedTextColor.RED, 3, 1),
-                        itemWithPrice(Material.DIAMOND, "Diamond", NamedTextColor.RED, 7, 1),
-                        spacer(),
-                        itemWithPrice(Material.GOLD_BLOCK, "Golden Apple dropper", NamedTextColor.RED, 20, 1),
-                        itemWithPrice(Material.REDSTONE_LAMP, "Rocket dropper", NamedTextColor.RED, 30, 1)
+                        itemWithPrice(Material.MACE, "Mace", NamedTextColor.RED, 25, 1),
+                        itemWithPrice(Material.WIND_CHARGE, "Wind charge", NamedTextColor.RED, 20, 5),
+                        itemWithPrice(Material.BOW, "Bow", NamedTextColor.RED, 10, 1),
+                        itemWithPriceCustom(new ItemStackBuilder(Material.BOW)
+                                .withName(Component.text("Punch Bow", NamedTextColor.RED))
+                                .withEnchantments(Map.of(Enchantment.PUNCH, 1))
+                                .buildStack(), 20
+                        ),
+                        itemWithPriceCustom(new ItemStackBuilder(Material.BOW)
+                                .withName(Component.text("More Punch Bow", NamedTextColor.RED))
+                                .withEnchantments(Map.of(Enchantment.PUNCH, 2, Enchantment.INFINITY, 1))
+                                .buildStack(), 40
+                        ),
+                        itemWithPrice(Material.ARROW, "Arrow", NamedTextColor.RED, 15, 3),
+                        itemWithPrice(Material.BOW, "Crossbow", NamedTextColor.RED, 20, 1),
+                        itemWithPriceCustom(new ItemStackBuilder(Material.FIREWORK_ROCKET)
+                                .withName(Component.text("Rocket", NamedTextColor.RED))
+                                .withAmount(3)
+                                .buildStack(), 30
+                        )
                 )
         ),
-        HUMANS(
-                new ItemStackBuilder(Material.GRASS_BLOCK)
-                        .withName(Component.text("Humans", NamedTextColor.GREEN, TextDecoration.BOLD))
-                        .withLore(Component.text("The stuff you need to survive.", NamedTextColor.GRAY))
+        DEFENSE(
+                new ItemStackBuilder(Material.SHIELD)
+                        .withName(Component.text("Defense", NamedTextColor.GREEN, TextDecoration.BOLD))
+                        .withLore(Component.text("Turrets and traps.", NamedTextColor.GRAY))
                         .buildStack(),
                 List.of(
                         itemWithPrice(Material.TORCH, "Torch", NamedTextColor.GREEN, 4, 1),
@@ -108,11 +111,11 @@ public class ItemShopScreen extends CScreen {
                         .buildStack(),
                 List.of(
                         itemWithPrice(Material.IRON_SHOVEL, "Iron shovel", NamedTextColor.WHITE, 4, 1),
-                        itemWithPriceCustom(Material.GOLDEN_SHOVEL, "Golden shovel", NamedTextColor.WHITE, 10,
+                        itemWithPriceCustom(
                                 new ItemStackBuilder(Material.GOLDEN_SHOVEL)
                                         .withName(Component.text("Golden shovel", NamedTextColor.WHITE))
                                         .withEnchantments(Map.of(Enchantment.EFFICIENCY, 2))
-                                        .buildStack()
+                                        .buildStack(), 10
                         )
                         //itemWithPrice(Material.WIND_CHARGE, "Wind charge", NamedTextColor.WHITE, 20, 5)
                 )
@@ -161,9 +164,10 @@ public class ItemShopScreen extends CScreen {
             ).onClick(event -> buyFunction(event, new ItemStackBuilder(material).withName(Component.text(name, color)).withAmount(amount).buildStack(), price));
         }
 
-        public static CItem itemWithPriceCustom(Material material, String name, NamedTextColor color, int price, ItemStack sold) {
-            return new CItem(new ItemStackBuilder(material).withName(Component.text(name, color))
+        public static CItem itemWithPriceCustom(ItemStack sold, int price) {
+            return new CItem(new ItemStackBuilder(sold.getType()).withName(sold.getItemMeta().displayName())
                     .withLore(Component.text("Price: ", NamedTextColor.GRAY).append(Component.text(price, NamedTextColor.GOLD)))
+                    .withEnchantments(sold.getEnchantments())
                     .buildStack()
             ).onClick(event -> buyFunction(event, sold, price));
         }

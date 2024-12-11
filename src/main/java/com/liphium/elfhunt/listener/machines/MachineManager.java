@@ -20,6 +20,7 @@ public class MachineManager {
         // Add all machines (all the ones that can be spawned by location)
         registered.add("CoinDropper");
         registered.add("PresentReceiver");
+        registered.add("PresentGiver");
         registered.add("ItemShop");
 
         for (String s : registered) {
@@ -71,7 +72,9 @@ public class MachineManager {
 
     public Machine newMachineByLocation(String name, Location location) {
         return switch (name) {
-            case "PumpkinDropper" -> new CoinDropper(location, false);
+            case "CoinDropper" -> new CoinDropper(location, false);
+            case "PresentReceiver" -> new PresentReceiver(location);
+            case "PresentGiver" -> new PresentGiver(location);
             case "ItemShop" -> new ItemShop(location);
             default -> null;
         };

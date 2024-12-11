@@ -208,6 +208,7 @@ public class IngameState extends GameState {
     public void onReceiverClicked(Player player, String name) {
         if(Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(player) instanceof ElfTeam) {
             if(Objects.equals(currentDelivery.get(player), name)) {
+                player.getInventory().remove(Material.RED_WOOL);
                 presentsLeft -= 1;
                 currentDelivery.remove(player);
 
@@ -220,6 +221,27 @@ public class IngameState extends GameState {
                 message = message.replace("%player%", player.getName());
                 player.sendMessage(Component.text("§f§l" + name + "§7: " + message));
             }
+        }
+    }
+
+    public void onGiverClicked(Player player) {
+        if(Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(player) instanceof ElfTeam) {
+            if(currentDelivery.containsKey(player)) {
+                Bukkit.broadcast(Component.text("§c§lSanta§7: I already gave you a present!"));
+                return;
+            }
+
+            // Get a random receiver to bring the present to
+            final var randomInt = ThreadLocalRandom.current().nextInt(receivers.size() - 1);
+            final var receiver = receivers.keySet().stream().toList().get(randomInt);
+
+            // Assign that receiver for the player
+            currentDelivery.put(player, receiver);
+            final var present = new ItemStackBuilder(Material.RED_WOOL)
+                    .withName(Component.text("Present", NamedTextColor.RED))
+                    .buildStack();
+            player.getInventory().addItem(present);
+            Bukkit.broadcast(Elfhunt.PREFIX.append(Component.text("§c§lSanta§7: Bring this present to §c" + receiver + "§7!")));
         }
     }
 
@@ -317,6 +339,9 @@ public class IngameState extends GameState {
             Bukkit.broadcast(Elfhunt.PREFIX.append(Component.text("§c" + player.getName() + " §7was killed by §c§l" + player.getKiller().getName() + "§7!")));
         } else
             Bukkit.broadcast(Elfhunt.PREFIX.append(Component.text("§c§l" + player.getKiller().getName() + " §7died!")));
+
+        // Make sure the player isn't still delivering
+        currentDelivery.remove(player);
 
         Elfhunt.getInstance().getTaskManager().inject(new Runnable() {
             int tickCount = 0;
