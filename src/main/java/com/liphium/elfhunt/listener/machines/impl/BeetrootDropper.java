@@ -53,11 +53,6 @@ public class BeetrootDropper extends Machine {
     }
 
     @Override
-    public void onBreak() {
-        stand.customName(Component.text("§c§oDestroyed"));
-    }
-
-    @Override
     public void destroy() {
         stand.remove();
     }
