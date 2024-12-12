@@ -66,7 +66,6 @@ public class PresentGiver extends Machine {
             if(Elfhunt.getInstance().getGameManager().getCurrentState() instanceof IngameState state) {
                 state.onGiverClicked(event.getPlayer());
             }
-            Core.getInstance().getScreens().open(event.getPlayer(), 3);
             event.setCancelled(true);
         }
     }

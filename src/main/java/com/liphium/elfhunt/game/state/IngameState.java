@@ -90,14 +90,14 @@ public class IngameState extends GameState {
                     tickCount = 0;
 
                     // Check if the win condition for the hunters is met
-                    if(countdown == 0) {
+                    if(countdown <= 0) {
                         handleWin(Elfhunt.getInstance().getGameManager().getTeamManager().getTeam("Hunters"));
                         return;
                     }
 
-                    Messages.actionBar(Component.text(maxPresents, NamedTextColor.GREEN)
+                    Messages.actionBar(Component.text(presentsLeft, NamedTextColor.GREEN)
                             .append(Component.text("/", NamedTextColor.GRAY))
-                            .append(Component.text(presentsLeft, NamedTextColor.GREEN))
+                            .append(Component.text(maxPresents, NamedTextColor.GREEN))
                             .appendSpace()
                             .append(Component.text("remaining", NamedTextColor.GRAY))
                             .appendSpace()
@@ -106,10 +106,9 @@ public class IngameState extends GameState {
                             .append(Component.text(formatTicks(countdown)).appendSpace()
                                     .append(Component.text("left", NamedTextColor.GRAY)))
                     );
-
-                    countdown--;
                 }
 
+                countdown--;
             }
         });
     }
@@ -215,6 +214,13 @@ public class IngameState extends GameState {
 
     public void onReceiverClicked(Player player, String name) {
         if(Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(player) instanceof ElfTeam team) {
+
+            // Make sure the guy actually has a present
+            if(!currentDelivery.containsKey(player)) {
+                player.sendMessage(Component.text("§f§l" + name + "§7: You don't even have a present! Get one from §cSanta §7first."));
+                return;
+            }
+
             if(Objects.equals(currentDelivery.get(player), name)) {
                 player.getInventory().remove(Material.RED_WOOL);
                 presentsLeft -= 1;
@@ -230,8 +236,8 @@ public class IngameState extends GameState {
                     handleWin(team);
                 }
             } else {
-                var message = messages.get(ThreadLocalRandom.current().nextInt(messages.size() - 1));
-                message = message.replace("%player%", player.getName());
+                var message = messages.get(ThreadLocalRandom.current().nextInt(messages.size()));
+                message = message.replace("%player%", currentDelivery.get(player));
                 player.sendMessage(Component.text("§f§l" + name + "§7: " + message));
             }
         }
@@ -245,7 +251,7 @@ public class IngameState extends GameState {
             }
 
             // Get a random receiver to bring the present to
-            final var randomInt = ThreadLocalRandom.current().nextInt(receivers.size() - 1);
+            final var randomInt = ThreadLocalRandom.current().nextInt(receivers.size());
             final var receiver = receivers.keySet().stream().toList().get(randomInt);
 
             // Assign that receiver for the player
@@ -254,7 +260,7 @@ public class IngameState extends GameState {
                     .withName(Component.text("Present", NamedTextColor.RED))
                     .buildStack();
             player.getInventory().addItem(present);
-            Bukkit.broadcast(Elfhunt.PREFIX.append(Component.text("§c§lSanta§7: Bring this present to §c" + receiver + "§7!")));
+            Bukkit.broadcast(Component.text("§c§lSanta§7: Bring this present to §c" + receiver + "§7!"));
         }
     }
 
@@ -283,13 +289,7 @@ public class IngameState extends GameState {
 
     @Override
     public void onDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof Player player) {
-            Team team = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(player);
-
-            if (team instanceof HunterTeam) {
-                event.setDamage(0);
-            }
-        } else event.setCancelled(true);
+        event.setCancelled(!(event.getEntity() instanceof Player));
     }
 
     @Override
@@ -345,8 +345,6 @@ public class IngameState extends GameState {
         event.setKeepInventory(true);
         event.deathMessage(null);
         event.setKeepLevel(true);
-
-        player.setGameMode(GameMode.SPECTATOR);
 
         if (player.getKiller() != null) {
             Bukkit.broadcast(Elfhunt.PREFIX.append(Component.text("§c" + player.getName() + " §7was killed by §c§l" + player.getKiller().getName() + "§7!")));

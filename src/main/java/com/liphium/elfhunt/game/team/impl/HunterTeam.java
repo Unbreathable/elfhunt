@@ -35,7 +35,7 @@ public class HunterTeam extends Team {
         player.getInventory().addItem(new ItemStackBuilder(Material.STONE_SWORD).makeUnbreakable().buildStack());
 
         if (teleport) {
-            player.teleport(Objects.requireNonNull(LocationAPI.getLocation("Elves")));
+            player.teleport(Objects.requireNonNull(LocationAPI.getLocation("Hunters")));
         }
     }
 

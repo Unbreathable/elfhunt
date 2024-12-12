@@ -1,15 +1,15 @@
-name: Vampires
+name: Elfhunt
 version: '1.0-SNAPSHOT'
-main: com.liphium.vampires.Vampires
+main: com.liphium.elfhunt.Elfhunt
 api-version: '1.21'
 depend:
   - Multiverse-Core
 
 commands:
   set:
-    description: "Set a location for Vampires."
+    description: "Set a location for Elfhunt."
     aliases: [ location ]
-    permission: vampires.admin
+    permission: elfhunt.admin
   timer:
-    description: "Manage the timer for Vampires."
-    permission: vampires.timer
+    description: "Manage the timer for Elfhunt."
+    permission: elfhunt.timer

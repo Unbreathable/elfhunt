@@ -100,7 +100,6 @@ public class PresentReceiver extends Machine {
             if(Elfhunt.getInstance().getGameManager().getCurrentState() instanceof IngameState state) {
                 state.onReceiverClicked(event.getPlayer(), chosenName);
             }
-            Core.getInstance().getScreens().open(event.getPlayer(), 3);
             event.setCancelled(true);
         }
     }

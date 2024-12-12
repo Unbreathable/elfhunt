@@ -51,7 +51,7 @@ public class ElfTeam extends Team {
         player.getInventory().setItemInOffHand(rocket);
 
         if (teleport) {
-            player.teleport(Objects.requireNonNull(LocationAPI.getLocation("Cave")));
+            player.teleport(Objects.requireNonNull(LocationAPI.getLocation("Elves")));
         }
     }
 
