@@ -99,7 +99,6 @@ public class MachineManager {
 
     public boolean breakLocation(Location location) {
         Machine toRemove = null;
-        // TODO: Convert machine list to Hashmap
         for (Machine machine : machines) {
             if (machine.isBreakable() && machine.getLocation().getBlock().getLocation().equals(location)) {
                 machine.destroy();

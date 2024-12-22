@@ -57,7 +57,7 @@ public class HunterTeam extends Team {
     public void handleWin() {
 
         Bukkit.broadcast(Component.text(" "));
-        Bukkit.broadcast(Component.text("   §aThe §c§lHunters §7won the §agame§7!"));
+        Bukkit.broadcast(Component.text("   §cThe §c§lHunters §7won the §cgame§7!"));
         Bukkit.broadcast(Component.text(" "));
         Bukkit.broadcast(Component.text("§7The §celves §7weren't able to hand out all"));
         Bukkit.broadcast(Component.text("§cpresents §7in time. What a shame!"));

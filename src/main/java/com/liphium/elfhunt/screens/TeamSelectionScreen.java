@@ -14,7 +14,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 public class TeamSelectionScreen extends CScreen {
 
     public TeamSelectionScreen() {
-        super(1, Component.text("Teams", NamedTextColor.GREEN, TextDecoration.BOLD), 3, true);
+        super(1, Component.text("Teams", NamedTextColor.DARK_GREEN, TextDecoration.BOLD), 3, true);
 
         background();
         rebuild();

@@ -1,13 +1,11 @@
 package com.liphium.elfhunt.game.state;
 
-import com.liphium.core.Core;
 import com.liphium.core.util.ItemStackBuilder;
 import com.liphium.elfhunt.Elfhunt;
 import com.liphium.elfhunt.game.GameState;
 import com.liphium.elfhunt.game.team.Team;
 import com.liphium.elfhunt.game.team.impl.ElfTeam;
 import com.liphium.elfhunt.game.team.impl.HunterTeam;
-import com.liphium.elfhunt.listener.machines.MachineManager;
 import com.liphium.elfhunt.listener.machines.impl.ItemShop;
 import com.liphium.elfhunt.listener.machines.impl.PresentReceiver;
 import com.liphium.elfhunt.screens.ItemShopScreen;
@@ -15,12 +13,8 @@ import com.liphium.elfhunt.util.LocationAPI;
 import com.liphium.elfhunt.util.Messages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
@@ -53,6 +47,11 @@ public class IngameState extends GameState {
     @Override
     public void start() {
 
+        // World cleanup
+        for (Entity entity : Objects.requireNonNull(Bukkit.getWorld("elfhunt")).getEntities()) {
+            if (entity.getType() != EntityType.ARMOR_STAND && entity.getType() != EntityType.PLAYER) entity.remove();
+        }
+
         // Change the amount of presents based on team size
         final var hunterSize = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam("Elves").getPlayers().size();
         int maxPresents = hunterSize * 10; // 10 per member of the team seems fine for 15 minutes
@@ -73,6 +72,7 @@ public class IngameState extends GameState {
 
             for (Player player : team.getPlayers()) {
                 player.getInventory().clear();
+                player.setHealth(20);
                 team.giveKit(player, true);
             }
         }
@@ -126,7 +126,7 @@ public class IngameState extends GameState {
     @Override
     public void onSpawn(EntitySpawnEvent event) {
         if (event.getEntityType().equals(EntityType.WIND_CHARGE) || event.getEntityType().equals(EntityType.BREEZE_WIND_CHARGE)
-                || event.getEntityType().equals(EntityType.BOAT)) {
+                || event.getEntityType().equals(EntityType.BOAT) || event.getEntityType().equals(EntityType.TNT)) {
             return;
         }
         if (event.getEntityType() == EntityType.ARMOR_STAND && placeItemShop) {
@@ -148,19 +148,17 @@ public class IngameState extends GameState {
             return;
         }
 
-        if (event.getPlayer().getCooldown(Material.STICK) > 0
-                && event.getItem() != null && event.getItem().getType().equals(Material.STICK)) {
-            event.setCancelled(true);
-        }
-
         if (event.getItem() != null) {
             Team team = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(event.getPlayer());
             ItemStack usedItem = event.getItem();
             if (usedItem.getType().equals(Material.TRIPWIRE_HOOK) && event.getClickedBlock() != null) {
                 traps.add(new SlowTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
                 reduceMainHandItem(event.getPlayer());
-            } else if (usedItem.getType().equals(Material.GLOWSTONE_DUST) && event.getClickedBlock() != null) {
-                traps.add(new GlowTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
+            } else if (usedItem.getType().equals(Material.VINE) && event.getClickedBlock() != null) {
+                traps.add(new PoisonTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
+                reduceMainHandItem(event.getPlayer());
+            } else if (usedItem.getType().equals(Material.TNT_MINECART) && event.getClickedBlock() != null) {
+                traps.add(new TNTTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
                 reduceMainHandItem(event.getPlayer());
             } else if (usedItem.getType().equals(Material.FEATHER) && event.getPlayer().getCooldown(Material.FEATHER) <= 0) {
                 event.getPlayer().setVelocity(event.getPlayer().getLocation().getDirection().normalize().multiply(event.getPlayer().isOnGround() ? 1.8 : 1.1));
@@ -179,6 +177,7 @@ public class IngameState extends GameState {
 
     @Override
     public void onInteractAtEntity(PlayerInteractAtEntityEvent event) {
+        System.out.println("interact at entity");
         Elfhunt.getInstance().getMachineManager().onInteractAtEntity(event);
 
         if (event.getRightClicked().getType().equals(EntityType.ARMOR_STAND)) {
@@ -246,7 +245,7 @@ public class IngameState extends GameState {
     public void onGiverClicked(Player player) {
         if(Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(player) instanceof ElfTeam) {
             if(currentDelivery.containsKey(player)) {
-                Bukkit.broadcast(Component.text("§c§lSanta§7: I already gave you a present!"));
+                player.sendMessage(Component.text("§c§lSanta§7: I already gave you a present!"));
                 return;
             }
 
@@ -260,7 +259,7 @@ public class IngameState extends GameState {
                     .withName(Component.text("Present", NamedTextColor.RED))
                     .buildStack();
             player.getInventory().addItem(present);
-            Bukkit.broadcast(Component.text("§c§lSanta§7: Bring this present to §c" + receiver + "§7!"));
+            player.sendMessage(Component.text("§c§lSanta§7: Bring this present to §c" + receiver + "§7!"));
         }
     }
 
@@ -289,7 +288,19 @@ public class IngameState extends GameState {
 
     @Override
     public void onDamage(EntityDamageEvent event) {
-        event.setCancelled(!(event.getEntity() instanceof Player));
+        event.setCancelled(false);
+    }
+
+    @Override
+    public void onDamageByEntity(EntityDamageByEntityEvent event) {
+        if(event.getEntity().getType() == EntityType.ARMOR_STAND) {
+            event.setCancelled(true);
+        }
+    }
+
+    @Override
+    public void onEntityExplode(EntityExplodeEvent event) {
+        event.blockList().clear();
     }
 
     @Override
@@ -303,6 +314,10 @@ public class IngameState extends GameState {
         final var machine = Elfhunt.getInstance().getMachineManager().newMachineByMaterial(event.getBlockPlaced().getType(), event.getBlockPlaced().getLocation());
         if (machine != null) {
             Elfhunt.getInstance().getMachineManager().addMachine(machine);
+        } else {
+
+            // Add the block as placed otherwise
+            placedBlocks.put(event.getBlock().getLocation(), true);
         }
     }
 
@@ -390,29 +405,15 @@ public class IngameState extends GameState {
     public void quit(Player player) {
         Team team = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(player);
         team.getPlayers().remove(player);
-    }
 
-    public static class BeetrootData {
-
-        public final Location location;
-        public final Item item;
-        public final long start;
-
-        public BeetrootData(Location location) {
-            this.location = location;
-
-            item = (Item) location.getWorld().spawnEntity(location.clone().add(0, 1, 0), EntityType.ITEM);
-            item.setItemStack(new ItemStackBuilder(Material.BEETROOT).buildStack());
-            item.setVelocity(new Vector(0, 0, 0));
-            item.setPickupDelay(1000000000);
-            item.setCanPlayerPickup(false);
-            item.setCanMobPickup(false);
-            item.setUnlimitedLifetime(true);
-            item.setCustomNameVisible(true);
-            item.customName(Component.text("Blood Garlic", NamedTextColor.RED, TextDecoration.BOLD));
-            start = System.currentTimeMillis();
+        // Make sure the team loses if there are no players left
+        if(team.getPlayers().isEmpty()) {
+            if(team instanceof HunterTeam) {
+                handleWin(Elfhunt.getInstance().getGameManager().getTeamManager().getTeam("Elves"));
+            } else {
+                handleWin(Elfhunt.getInstance().getGameManager().getTeamManager().getTeam("Hunters"));
+            }
         }
-
     }
 
     public static abstract class DroppableTrap {
@@ -438,6 +439,21 @@ public class IngameState extends GameState {
         public abstract void onEnter(Player player);
     }
 
+    public static class TNTTrap extends DroppableTrap {
+
+        TNTTrap(Location location, Team team) {
+            super(location, team, Material.TNT_MINECART);
+        }
+
+        @Override
+        public void onEnter(Player player) {
+            final var tnt = (TNTPrimed) location.getWorld().spawnEntity(location.clone().add(0, 1, 0), EntityType.TNT);
+            tnt.setFuseTicks(10);
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 50, 4));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
+        }
+    }
+
     public static class SlowTrap extends DroppableTrap {
 
         SlowTrap(Location location, Team team) {
@@ -446,44 +462,20 @@ public class IngameState extends GameState {
 
         @Override
         public void onEnter(Player player) {
-
-            // Notify all players in the team that planted the trap
-            final var x = player.getLocation().getBlockX();
-            final var y = player.getLocation().getBlockY();
-            final var z = player.getLocation().getBlockZ();
-            for (Player human : team.getPlayers()) {
-                human.sendMessage(Component.text(" "));
-                human.sendMessage(Component.text("     §c§l" + player.getName() + " §7walked into a slow trap."));
-                human.sendMessage(Component.text("     §7Location: §c" + x + " " + y + " " + z));
-                human.sendMessage(Component.text(" "));
-            }
-
-            // Give the player slowness
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 200, 2));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 300, 4));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
         }
     }
 
-    public static class GlowTrap extends DroppableTrap {
+    public static class PoisonTrap extends DroppableTrap {
 
-        GlowTrap(Location location, Team team) {
-            super(location, team, Material.GLOWSTONE_DUST);
+        PoisonTrap(Location location, Team team) {
+            super(location, team, Material.VINE);
         }
 
         @Override
         public void onEnter(Player player) {
-
-            // Notify all players in the team that planted the trap
-            final var x = player.getLocation().getBlockX();
-            final var y = player.getLocation().getBlockY();
-            final var z = player.getLocation().getBlockZ();
-            for (Player human : team.getPlayers()) {
-                human.sendMessage(Component.text(" "));
-                human.sendMessage(Component.text("     §c§l" + player.getName() + " §7walked into a glow trap."));
-                human.sendMessage(Component.text("     §7Location: §c" + x + " " + y + " " + z));
-                human.sendMessage(Component.text(" "));
-            }
-
-            // Give the player slowness
+            player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 300, 2));
             player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
         }
     }

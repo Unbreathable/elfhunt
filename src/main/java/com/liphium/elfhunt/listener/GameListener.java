@@ -23,6 +23,11 @@ public class GameListener implements Listener {
     }
 
     @EventHandler
+    public void onExplode(EntityExplodeEvent event) {
+        Elfhunt.getInstance().getGameManager().getCurrentState().onEntityExplode(event);
+    }
+
+    @EventHandler
     public void onBreak(BlockBreakEvent event) {
         Elfhunt.getInstance().getGameManager().getCurrentState().onBreak(event);
     }
@@ -63,7 +68,10 @@ public class GameListener implements Listener {
                 || event.getEntityType().equals(EntityType.FIREWORK_ROCKET)
                 || event.getEntityType().equals(EntityType.ARMOR_STAND)
                 || event.getEntityType().equals(EntityType.POTION)
-                || event.getEntityType().equals(EntityType.AREA_EFFECT_CLOUD)) {
+                || event.getEntityType().equals(EntityType.AREA_EFFECT_CLOUD)
+                || event.getEntityType().equals(EntityType.WIND_CHARGE)
+                || event.getEntityType().equals(EntityType.BREEZE_WIND_CHARGE)
+                || event.getEntityType().equals(EntityType.TNT)) {
             Elfhunt.getInstance().getGameManager().getCurrentState().onSpawn(event);
             return;
         }

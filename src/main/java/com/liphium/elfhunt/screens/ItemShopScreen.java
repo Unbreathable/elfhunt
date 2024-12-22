@@ -20,7 +20,7 @@ import java.util.Map;
 public class ItemShopScreen extends CScreen {
 
     public ItemShopScreen() {
-        super(3, Component.text("Item shop", NamedTextColor.GOLD, TextDecoration.BOLD), 4, false);
+        super(3, Component.text("Item shop", NamedTextColor.DARK_GREEN, TextDecoration.BOLD), 4, false);
     }
 
     @Override
@@ -135,7 +135,7 @@ public class ItemShopScreen extends CScreen {
                         .buildStack(),
                 List.of(
                         itemWithPrice(Material.PACKED_ICE, "Ice", NamedTextColor.WHITE, 2, 16),
-                        itemWithPrice(Material.RED_WOOL, "Snow", NamedTextColor.WHITE, 4, 16),
+                        itemWithPrice(Material.SNOW_BLOCK, "Snow", NamedTextColor.WHITE, 4, 16),
                         itemWithPrice(Material.SPRUCE_LOG, "Spruce wood", NamedTextColor.WHITE, 8, 4),
                         itemWithPrice(Material.COBBLESTONE, "Cobblestone", NamedTextColor.WHITE, 8, 16),
                         spacer(),
@@ -177,7 +177,7 @@ public class ItemShopScreen extends CScreen {
             return items;
         }
 
-        private static ItemStack item = new ItemStackBuilder(Material.BLACK_STAINED_GLASS_PANE).withName(Component.text("§r")).buildStack();
+        private static final ItemStack item = new ItemStackBuilder(Material.BLACK_STAINED_GLASS_PANE).withName(Component.text("§r")).buildStack();
 
         public static CItem spacer() {
             return new CItem(item).notClickable();
@@ -186,6 +186,7 @@ public class ItemShopScreen extends CScreen {
         public static CItem itemWithPrice(Material material, String name, NamedTextColor color, int price, int amount) {
             return new CItem(new ItemStackBuilder(material).withName(Component.text(name, color))
                     .withLore(Component.text("Price: ", NamedTextColor.GRAY).append(Component.text(price, NamedTextColor.GOLD)))
+                    .withAmount(amount)
                     .buildStack()
             ).onClick(event -> buyFunction(event, new ItemStackBuilder(material).withName(Component.text(name, color)).withAmount(amount).buildStack(), price));
         }

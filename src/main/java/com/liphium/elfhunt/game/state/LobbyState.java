@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -37,9 +38,10 @@ public class LobbyState extends GameState {
 
         Location location = LocationAPI.getLocation("Elves");
         if (location != null && location.getWorld() != null) {
-            location.getWorld().setTime(18000);
+            location.getWorld().setTime(0);
             location.getWorld().setThundering(false);
             location.getWorld().setStorm(false);
+            location.getWorld().setGameRule(GameRule.NATURAL_REGENERATION, false);
             location.getWorld().setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
             location.getWorld().setGameRule(GameRule.DO_WEATHER_CYCLE, false);
             location.getWorld().setDifficulty(Difficulty.PEACEFUL);
@@ -83,8 +85,8 @@ public class LobbyState extends GameState {
 
                                 for (Player player : Bukkit.getOnlinePlayers()) {
                                     player.showTitle(Title.title(
-                                            Component.text("Vampires", NamedTextColor.RED, TextDecoration.BOLD),
-                                            Component.text("Halloween Special", NamedTextColor.GRAY),
+                                            Component.text("Elfhunt", NamedTextColor.GREEN, TextDecoration.BOLD),
+                                            Component.text("Christmas Special", NamedTextColor.GRAY),
                                             Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(3), Duration.ofSeconds(1))
                                     ));
                                     player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
@@ -97,9 +99,9 @@ public class LobbyState extends GameState {
 
                             for (Player player : Bukkit.getOnlinePlayers()) {
                                 player.showTitle(Title.title(
-                                        Component.text(count, NamedTextColor.RED, TextDecoration.BOLD)
+                                        Component.text(count, NamedTextColor.GREEN, TextDecoration.BOLD)
                                                 .append(Component.text("..", NamedTextColor.GRAY)),
-                                        Component.text("Vampires", NamedTextColor.GRAY),
+                                        Component.text("Elfhunt", NamedTextColor.GRAY),
                                         Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(3), Duration.ofSeconds(1))
                                 ));
                                 player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1f, 1f);
@@ -108,28 +110,28 @@ public class LobbyState extends GameState {
                         } else if (count % 10 == 0 && count <= 100) {
                             Bukkit.broadcast(Elfhunt.PREFIX
                                     .append(Component.text("The ", NamedTextColor.GRAY))
-                                    .append(Component.text("game ", NamedTextColor.RED))
+                                    .append(Component.text("game ", NamedTextColor.GREEN))
                                     .append(Component.text("starts in ", NamedTextColor.GRAY))
-                                    .append(Component.text(count + " seconds", NamedTextColor.RED))
+                                    .append(Component.text(count + " seconds", NamedTextColor.GREEN))
                                     .append(Component.text(".", NamedTextColor.GRAY))
                             );
                         }
 
                         if (paused) {
                             Messages.actionBar(Component.text("Countdown ", NamedTextColor.GRAY)
-                                    .append(Component.text("paused", NamedTextColor.RED)));
+                                    .append(Component.text("paused", NamedTextColor.GREEN)));
                         } else {
-                            Messages.actionBar(Component.text(count, NamedTextColor.RED, TextDecoration.BOLD)
+                            Messages.actionBar(Component.text(count, NamedTextColor.GREEN, TextDecoration.BOLD)
                                     .append(Component.text("..", NamedTextColor.GRAY)));
                         }
                     } else {
 
                         Messages.actionBar(Component.text("Waiting for ", NamedTextColor.GRAY)
-                                .append(Component.text("players", NamedTextColor.RED))
+                                .append(Component.text("players", NamedTextColor.GREEN))
                                 .append(Component.text(".. (", NamedTextColor.GRAY))
-                                .append(Component.text(Bukkit.getOnlinePlayers().size(), NamedTextColor.RED))
+                                .append(Component.text(Bukkit.getOnlinePlayers().size(), NamedTextColor.GREEN))
                                 .append(Component.text("/", NamedTextColor.GRAY))
-                                .append(Component.text(NEEDED_PlAYERS, NamedTextColor.RED))
+                                .append(Component.text(NEEDED_PlAYERS, NamedTextColor.GREEN))
                                 .append(Component.text(")", NamedTextColor.GRAY)));
                         count = 199;
                     }
@@ -156,6 +158,7 @@ public class LobbyState extends GameState {
     @Override
     public void join(Player player) {
         player.setGameMode(GameMode.SURVIVAL);
+        player.setHealth(20);
 
         player.getInventory().clear();
         player.getInventory().setHelmet(null);
@@ -163,7 +166,7 @@ public class LobbyState extends GameState {
         player.getInventory().setLeggings(null);
         player.getInventory().setBoots(null);
 
-        player.getInventory().setItem(4, new ItemStackBuilder(Material.SADDLE).withName(Component.text("§c§lTeams §7(Right-click)"))
+        player.getInventory().setItem(4, new ItemStackBuilder(Material.SADDLE).withName(Component.text("§a§lTeams §7(Right-click)"))
                 .withLore(Component.text("§7§oJoin a team.")).buildStack());
 
         player.teleport(LocationAPI.getLocation("Elves"));

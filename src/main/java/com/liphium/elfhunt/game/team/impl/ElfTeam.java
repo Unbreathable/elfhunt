@@ -72,10 +72,10 @@ public class ElfTeam extends Team {
     public void handleWin() {
 
         Bukkit.broadcast(Component.text(" "));
-        Bukkit.broadcast(Component.text("   §cThe §a§lElves §7won the §cgame§7!"));
+        Bukkit.broadcast(Component.text("   §aThe §a§lElves §7won the §agame§7!"));
         Bukkit.broadcast(Component.text(" "));
-        Bukkit.broadcast(Component.text("§7All §chumans §7were imprisoned and the §cvampires"));
-        Bukkit.broadcast(Component.text("§7took over the §cworld§7!"));
+        Bukkit.broadcast(Component.text("§7All §apresents §7were delivered and the §aeveryone"));
+        Bukkit.broadcast(Component.text("§7can enjoy a beautiful §aChristmas§7!"));
         Bukkit.broadcast(Component.text(" "));
 
         for (Player player : getPlayers()) {

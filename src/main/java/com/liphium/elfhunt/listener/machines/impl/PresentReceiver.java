@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class PresentReceiver extends Machine {
 
-    private final ArmorStand stand;
+    private ArmorStand stand;
     private static final ArrayList<String> names = new ArrayList<>(List.of(
             "Julian", "Thorben", "Crash", "Jonas", "Shadow", "Tim",
             "Atlas", "Animo", "Louis", "Liph", "Ritso", "Glaze", "Jumbo",
@@ -46,21 +46,12 @@ public class PresentReceiver extends Machine {
 
     public PresentReceiver(Location location) {
         super(location, false);
-
-        stand = location.getWorld().spawn(location.clone().add(0, 0, 0), ArmorStand.class);
-        setupStand();
-    }
-
-    public PresentReceiver(ArmorStand stand) {
-        super(stand.getLocation(), false);
-
-        this.stand = stand;
-        setupStand();
     }
 
     void setupStand() {
+        stand = location.getWorld().spawn(location.clone().add(0, 0, 0), ArmorStand.class);
         stand.setCustomNameVisible(true);
-        stand.customName(Component.text("Unnamed", NamedTextColor.WHITE, TextDecoration.BOLD));
+        stand.customName(Component.text(chosenName, NamedTextColor.WHITE, TextDecoration.BOLD));
         stand.setGravity(false);
         stand.setInvulnerable(true);
         stand.setRemoveWhenFarAway(false);
@@ -90,8 +81,8 @@ public class PresentReceiver extends Machine {
      * @param name Name to change to
      */
     public void assignName(String name) {
-        stand.customName(Component.text(name, NamedTextColor.WHITE, TextDecoration.BOLD));
         chosenName = name;
+        setupStand();
     }
 
     @Override
