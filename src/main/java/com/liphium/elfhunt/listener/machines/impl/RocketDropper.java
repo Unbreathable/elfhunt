@@ -15,14 +15,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Vector;
 
+import java.util.UUID;
+
 public class RocketDropper extends Machine {
 
-    private final ArmorStand stand;
+    private UUID uniqueId;
 
     public RocketDropper(Location location) {
         super(location, true);
 
-        stand = location.getWorld().spawn(location.clone().add(0.5, -0.5, 0.5), ArmorStand.class);
+        ArmorStand stand = location.getWorld().spawn(location.clone().add(0.5, -0.5, 0.5), ArmorStand.class);
 
         stand.setCustomNameVisible(true);
         stand.customName(Component.text("Rockets", NamedTextColor.RED).appendSpace()
@@ -31,16 +33,25 @@ public class RocketDropper extends Machine {
         stand.setInvisible(true);
         stand.setInvulnerable(true);
         stand.setRemoveWhenFarAway(false);
+
+        uniqueId = stand.getUniqueId();
     }
 
     int count = 20, tickCount = 0;
 
     @Override
     public void tick() {
-        if (broken) return;
+        if (broken) {
+            return;
+        }
 
         if (tickCount++ >= 20) {
             tickCount = 0;
+
+            final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+            if(stand == null) {
+                return;
+            }
 
             count--;
             stand.customName(Component.text("Rocket", NamedTextColor.RED).appendSpace()
@@ -66,6 +77,10 @@ public class RocketDropper extends Machine {
 
     @Override
     public void destroy() {
+        final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+        if(stand == null) {
+            return;
+        }
         stand.remove();
     }
 }

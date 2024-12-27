@@ -11,26 +11,18 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
+import java.util.UUID;
+
 
 public class ItemShop extends Machine {
 
-    private final ArmorStand stand;
+    private UUID uniqueId;
 
     public ItemShop(Location location) {
         super(location, false);
 
-        stand = location.getWorld().spawn(location.clone().add(0, 0, 0), ArmorStand.class);
-        setupStand();
-    }
+        ArmorStand stand = location.getWorld().spawn(location.clone(), ArmorStand.class);
 
-    public ItemShop(ArmorStand stand) {
-        super(stand.getLocation(), false);
-
-        this.stand = stand;
-        setupStand();
-    }
-
-    void setupStand() {
         stand.setCustomNameVisible(true);
         stand.customName(Component.text("Item shop", NamedTextColor.GOLD, TextDecoration.BOLD));
         stand.setGravity(false);
@@ -55,18 +47,28 @@ public class ItemShop extends Machine {
         stand.getEquipment().setChestplate(chestplate);
         stand.getEquipment().setLeggings(leggings);
         stand.getEquipment().setBoots(boots);
+
+        uniqueId = stand.getUniqueId();
     }
 
     @Override
     public void onInteractAtEntity(PlayerInteractAtEntityEvent event) {
+        final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+        if(stand == null) {
+            return;
+        }
+
         if (event.getRightClicked().equals(stand)) {
             Core.getInstance().getScreens().open(event.getPlayer(), 3);
             event.setCancelled(true);
         }
     }
-
     @Override
     public void destroy() {
+        final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+        if(stand == null) {
+            return;
+        }
         stand.remove();
     }
 }

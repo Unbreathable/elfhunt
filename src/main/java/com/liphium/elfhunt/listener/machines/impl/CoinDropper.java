@@ -13,18 +13,23 @@ import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
+import java.util.UUID;
+
 public class CoinDropper extends Machine {
 
-    private final ArmorStand stand;
+    private UUID uniqueId;
 
     public CoinDropper(Location location, boolean breakable) {
         super(location, breakable);
 
+        ArmorStand stand;
         if (breakable) {
             stand = location.getWorld().spawn(location.clone().add(0.5, -0.5, 0.5), ArmorStand.class);
         } else {
             stand = location.getWorld().spawn(location.clone().add(0, -1.5, 0), ArmorStand.class);
         }
+
+        uniqueId = stand.getUniqueId();
 
         stand.setCustomNameVisible(true);
         stand.customName(Component.text("Coins", NamedTextColor.GOLD).appendSpace()
@@ -38,11 +43,26 @@ public class CoinDropper extends Machine {
     int count = 20, tickCount = 0;
 
     @Override
+    public void destroy() {
+        final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+        if(stand == null) {
+            return;
+        }
+        stand.remove();
+    }
+
+    @Override
     public void tick() {
-        if (broken) return;
+        if (broken) {
+            return;
+        }
 
         if (tickCount++ >= 20) {
             tickCount = 0;
+            final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+            if(stand == null) {
+                return;
+            }
 
             count--;
             stand.customName(Component.text("Coin", NamedTextColor.GOLD).appendSpace()
@@ -69,10 +89,5 @@ public class CoinDropper extends Machine {
 
     int computeCount() {
         return Math.max(10 - Bukkit.getOnlinePlayers().size(), 3);
-    }
-
-    @Override
-    public void destroy() {
-        stand.remove();
     }
 }

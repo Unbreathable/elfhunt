@@ -47,9 +47,9 @@ public final class Elfhunt extends JavaPlugin {
         taskManager = new TaskManager();
         taskManager.initTask();
 
-        gameManager = new GameManager();
-
         machineManager = new MachineManager();
+
+        gameManager = new GameManager();
 
         Listener[] listeners = new Listener[]{new GameListener(), new ChatListener(), new JoinQuitListener()};
         for (Listener listener : listeners) {
@@ -64,10 +64,6 @@ public final class Elfhunt extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        for (Machine machine : machineManager.getMachines()) {
-            machine.destroy();
-        }
-
         core.deleteWorld("elfhunt");
     }
 

@@ -1,6 +1,5 @@
 package com.liphium.elfhunt.listener.machines.impl;
 
-import com.liphium.core.Core;
 import com.liphium.elfhunt.Elfhunt;
 import com.liphium.elfhunt.game.state.IngameState;
 import com.liphium.elfhunt.listener.machines.Machine;
@@ -15,16 +14,13 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 
 public class PresentReceiver extends Machine {
 
-    private ArmorStand stand;
+    private UUID uniqueId;
     private static final ArrayList<String> names = new ArrayList<>(List.of(
             "Julian", "Thorben", "Crash", "Jonas", "Shadow", "Tim",
             "Atlas", "Animo", "Louis", "Liph", "Ritso", "Glaze", "Jumbo",
@@ -46,12 +42,10 @@ public class PresentReceiver extends Machine {
 
     public PresentReceiver(Location location) {
         super(location, false);
-    }
 
-    void setupStand() {
-        stand = location.getWorld().spawn(location.clone().add(0, 0, 0), ArmorStand.class);
+        ArmorStand stand = location.getWorld().spawn(location.clone(), ArmorStand.class);
         stand.setCustomNameVisible(true);
-        stand.customName(Component.text(chosenName, NamedTextColor.WHITE, TextDecoration.BOLD));
+        stand.customName(Component.text("Unnamed", NamedTextColor.WHITE, TextDecoration.BOLD));
         stand.setGravity(false);
         stand.setInvulnerable(true);
         stand.setRemoveWhenFarAway(false);
@@ -74,6 +68,8 @@ public class PresentReceiver extends Machine {
         stand.getEquipment().setChestplate(chestplate);
         stand.getEquipment().setLeggings(leggings);
         stand.getEquipment().setBoots(boots);
+
+        uniqueId = stand.getUniqueId();
     }
 
     /**
@@ -82,11 +78,22 @@ public class PresentReceiver extends Machine {
      */
     public void assignName(String name) {
         chosenName = name;
-        setupStand();
+
+        final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+        if(stand == null) {
+            return;
+        }
+
+        stand.customName(Component.text(chosenName, NamedTextColor.WHITE, TextDecoration.BOLD));
     }
 
     @Override
     public void onInteractAtEntity(PlayerInteractAtEntityEvent event) {
+        final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+        if(stand == null) {
+            return;
+        }
+
         if (event.getRightClicked().equals(stand)) {
             if(Elfhunt.getInstance().getGameManager().getCurrentState() instanceof IngameState state) {
                 state.onReceiverClicked(event.getPlayer(), chosenName);
@@ -97,6 +104,10 @@ public class PresentReceiver extends Machine {
 
     @Override
     public void destroy() {
+        final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+        if(stand == null) {
+            return;
+        }
         stand.remove();
     }
 }

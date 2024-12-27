@@ -6,7 +6,6 @@ import com.liphium.elfhunt.game.GameState;
 import com.liphium.elfhunt.game.team.Team;
 import com.liphium.elfhunt.game.team.impl.ElfTeam;
 import com.liphium.elfhunt.game.team.impl.HunterTeam;
-import com.liphium.elfhunt.listener.machines.impl.ItemShop;
 import com.liphium.elfhunt.listener.machines.impl.PresentReceiver;
 import com.liphium.elfhunt.screens.ItemShopScreen;
 import com.liphium.elfhunt.util.LocationAPI;
@@ -122,22 +121,6 @@ public class IngameState extends GameState {
         return String.format("§a%02d§7:§a%02d", minutes, seconds);
     }
 
-    private boolean placeItemShop = false;
-
-    @Override
-    public void onSpawn(EntitySpawnEvent event) {
-        if (event.getEntityType().equals(EntityType.WIND_CHARGE) || event.getEntityType().equals(EntityType.BREEZE_WIND_CHARGE)
-                || event.getEntityType().equals(EntityType.BOAT) || event.getEntityType().equals(EntityType.TNT)
-                || event.getEntityType().equals(EntityType.ARROW)) {
-            return;
-        }
-        if (event.getEntityType() == EntityType.ARMOR_STAND && placeItemShop) {
-            final var itemShop = new ItemShop((ArmorStand) event.getEntity());
-            Elfhunt.getInstance().getMachineManager().addMachine(itemShop);
-            placeItemShop = false;
-        }
-    }
-
     @Override
     public void onInteract(PlayerInteractEvent event) {
         if (event.getItem() != null && event.getItem().getType() == Material.WIND_CHARGE) {
@@ -145,15 +128,10 @@ public class IngameState extends GameState {
         }
         Elfhunt.getInstance().getMachineManager().onInteract(event);
 
-        if (event.getClickedBlock() != null && event.getItem() != null && event.getItem().getType().equals(Material.ARMOR_STAND)) {
-            placeItemShop = true;
-            return;
-        }
-
         if (event.getItem() != null) {
             Team team = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(event.getPlayer());
             ItemStack usedItem = event.getItem();
-            if (usedItem.getType().equals(Material.LEATHER_BOOTS) && event.getClickedBlock() != null) {
+            if (usedItem.getType().equals(Material.GRAY_DYE) && event.getClickedBlock() != null) {
                 traps.add(new SlowTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
                 reduceMainHandItem(event.getPlayer());
             } else if (usedItem.getType().equals(Material.GREEN_DYE) && event.getClickedBlock() != null) {
@@ -165,7 +143,7 @@ public class IngameState extends GameState {
             } else if (usedItem.getType().equals(Material.LIGHT_BLUE_DYE) && event.getClickedBlock() != null) {
                 traps.add(new FreezeTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
                 reduceMainHandItem(event.getPlayer());
-            }  else if (usedItem.getType().equals(Material.STRING) && event.getClickedBlock() != null) {
+            }  else if (usedItem.getType().equals(Material.WHITE_DYE) && event.getClickedBlock() != null) {
                 traps.add(new WebTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
                 reduceMainHandItem(event.getPlayer());
             } else if (usedItem.getType().equals(Material.FEATHER) && event.getPlayer().getCooldown(Material.FEATHER) <= 0) {
@@ -185,7 +163,6 @@ public class IngameState extends GameState {
 
     @Override
     public void onInteractAtEntity(PlayerInteractAtEntityEvent event) {
-        System.out.println("interact at entity");
         Elfhunt.getInstance().getMachineManager().onInteractAtEntity(event);
 
         if (event.getRightClicked().getType().equals(EntityType.ARMOR_STAND)) {
@@ -325,6 +302,11 @@ public class IngameState extends GameState {
             return;
         }
 
+        if(event.getBlockPlaced().getLocation().getY() >= 220) {
+            event.setCancelled(true);
+            return;
+        }
+
         // Place a machine if it is one
         final var machine = Elfhunt.getInstance().getMachineManager().newMachineByMaterial(event.getBlockPlaced().getType(), event.getBlockPlaced().getLocation());
         if (machine != null) {
@@ -377,9 +359,9 @@ public class IngameState extends GameState {
         event.setKeepLevel(true);
 
         if (player.getKiller() != null) {
-            Bukkit.broadcast(Elfhunt.PREFIX.append(Component.text("§c" + player.getName() + " §7was killed by §c§l" + player.getKiller().getName() + "§7!")));
+            Bukkit.broadcast(Elfhunt.PREFIX.append(Component.text("§a" + player.getName() + " §7was killed by §a§l" + player.getKiller().getName() + "§7!")));
         } else
-            Bukkit.broadcast(Elfhunt.PREFIX.append(Component.text("§c§l" + player.getKiller().getName() + " §7died!")));
+            Bukkit.broadcast(Elfhunt.PREFIX.append(Component.text("§a§l" + player.getName() + " §7died!")));
 
         // Make sure the player isn't still delivering
         currentDelivery.remove(player);
@@ -408,6 +390,7 @@ public class IngameState extends GameState {
         } else {
             event.setRespawnLocation(Objects.requireNonNull(LocationAPI.getLocation("Elves")));
         }
+        team.giveKit(event.getPlayer(), false);
     }
 
     public void handleWin(Team team) {
@@ -457,7 +440,7 @@ public class IngameState extends GameState {
     public static class SlowTrap extends DroppableTrap {
 
         SlowTrap(Location location, Team team) {
-            super(location, team, Material.TRIPWIRE_HOOK);
+            super(location, team, Material.GRAY_DYE);
         }
 
         @Override
@@ -470,12 +453,12 @@ public class IngameState extends GameState {
     public static class PoisonTrap extends DroppableTrap {
 
         PoisonTrap(Location location, Team team) {
-            super(location, team, Material.VINE);
+            super(location, team, Material.GREEN_DYE);
         }
 
         @Override
         public void onEnter(Player player) {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 300, 2));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 100, 2));
             player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
         }
     }
@@ -483,32 +466,34 @@ public class IngameState extends GameState {
     public static class FreezeTrap extends DroppableTrap {
 
         FreezeTrap(Location location, Team team) {
-            super(location, team, Material.BLUE_ICE);
+            super(location, team, Material.LIGHT_BLUE_DYE);
         }
 
         @Override
         public void onEnter(Player player) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100, 255, true, false));
             player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, 128, true, false));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
         }
     }
 
     public static class FlyTrap extends DroppableTrap {
 
         FlyTrap(Location location, Team team) {
-            super(location, team, Material.SCAFFOLDING);
+            super(location, team, Material.FEATHER);
         }
 
         @Override
         public void onEnter(Player player) {
-            player.setVelocity(new Vector(0, 5, 0));
+            player.setVelocity(new Vector(0, 3, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
         }
     }
 
     public static class WebTrap extends DroppableTrap {
 
         WebTrap(Location location, Team team) {
-            super(location, team, Material.COBWEB);
+            super(location, team, Material.WHITE_DYE);
         }
 
         @Override
@@ -520,6 +505,7 @@ public class IngameState extends GameState {
             main.getRelative(BlockFace.WEST).setType(Material.COBWEB);
             main.getRelative(BlockFace.NORTH).setType(Material.COBWEB);
             main.getRelative(BlockFace.SOUTH).setType(Material.COBWEB);
+            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
         }
     }
 }

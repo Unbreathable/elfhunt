@@ -4,6 +4,7 @@ import com.liphium.core.Core;
 import com.liphium.core.util.ItemStackBuilder;
 import com.liphium.elfhunt.Elfhunt;
 import com.liphium.elfhunt.game.GameState;
+import com.liphium.elfhunt.listener.machines.Machine;
 import com.liphium.elfhunt.util.LocationAPI;
 import com.liphium.elfhunt.util.Messages;
 import net.kyori.adventure.text.Component;

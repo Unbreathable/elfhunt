@@ -27,10 +27,10 @@ public class HunterTeam extends Team {
     @Override
     public void giveKit(Player player, boolean teleport) {
         player.getInventory().setHelmet(new ItemStackBuilder(Material.NETHERITE_HELMET).makeUnbreakable()
-                .addEnchantment(Enchantment.BLAST_PROTECTION, 3).buildStack());
+                .addEnchantment(Enchantment.PROTECTION, 3).buildStack());
 
         player.getInventory().setBoots(new ItemStackBuilder(Material.LEATHER_BOOTS).makeUnbreakable()
-                .withLeatherColor(Color.GREEN).buildStack());
+                .withLeatherColor(Color.RED).buildStack());
 
         player.getInventory().addItem(new ItemStackBuilder(Material.STONE_SWORD).makeUnbreakable().buildStack());
 

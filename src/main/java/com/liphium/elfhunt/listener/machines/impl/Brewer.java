@@ -15,15 +15,16 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Brewer extends Machine {
 
-    private final ArmorStand stand;
+    private final UUID uniqueId;
 
     public Brewer(Location location) {
         super(location, true);
 
-        stand = location.getWorld().spawn(location.clone().add(0.5, -0.5, 0.5), ArmorStand.class);
+        ArmorStand stand = location.getWorld().spawn(location.clone().add(0.5, -0.5, 0.5), ArmorStand.class);
 
         stand.setCustomNameVisible(true);
         stand.customName(Component.text("Click the", NamedTextColor.GRAY).appendSpace()
@@ -34,6 +35,17 @@ public class Brewer extends Machine {
         stand.setVisible(false);
         stand.setInvulnerable(true);
         stand.setRemoveWhenFarAway(false);
+
+        uniqueId = stand.getUniqueId();
+    }
+
+    @Override
+    public void destroy() {
+        final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+        if(stand == null) {
+            return;
+        }
+        stand.remove();
     }
 
     int tickCount = 0, count = 60;
@@ -41,11 +53,19 @@ public class Brewer extends Machine {
 
     @Override
     public void tick() {
+        if (broken) {
+            return;
+        }
 
         if (currentPotion != null) {
             if (tickCount++ >= 20) {
                 count--;
                 tickCount = 0;
+
+                final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+                if(stand == null) {
+                    return;
+                }
 
                 // Set the custom name of the brew stand
                 stand.customName(Component.text()
@@ -80,10 +100,6 @@ public class Brewer extends Machine {
         return String.join(" ", words);
     }
 
-    @Override
-    public void destroy() {
-        stand.remove();
-    }
 
     @Override
     public void onInteract(PlayerInteractEvent event) {
@@ -100,6 +116,11 @@ public class Brewer extends Machine {
 
     @Override
     public void onInteractAtEntity(PlayerInteractAtEntityEvent event) {
+        final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+        if(stand == null) {
+            return;
+        }
+
         if (event.getRightClicked().equals(stand)) {
             Core.getInstance().getScreens().open(event.getPlayer(), 2);
             clickedBrewer.put(event.getPlayer(), this);

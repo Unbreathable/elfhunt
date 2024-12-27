@@ -1,6 +1,5 @@
 package com.liphium.elfhunt.listener.machines.impl;
 
-import com.liphium.core.Core;
 import com.liphium.elfhunt.Elfhunt;
 import com.liphium.elfhunt.game.state.IngameState;
 import com.liphium.elfhunt.listener.machines.Machine;
@@ -15,25 +14,17 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
+import java.util.UUID;
+
 public class PresentGiver extends Machine {
 
-    private final ArmorStand stand;
+    private UUID uniqueId;
 
     public PresentGiver(Location location) {
         super(location, false);
 
-        stand = location.getWorld().spawn(location.clone().add(0, 0, 0), ArmorStand.class);
-        setupStand();
-    }
+        ArmorStand stand = location.getWorld().spawn(location.clone(), ArmorStand.class);
 
-    public PresentGiver(ArmorStand stand) {
-        super(stand.getLocation(), false);
-
-        this.stand = stand;
-        setupStand();
-    }
-
-    void setupStand() {
         stand.setCustomNameVisible(true);
         stand.customName(Component.text("Santa", NamedTextColor.RED, TextDecoration.BOLD));
         stand.setGravity(false);
@@ -58,10 +49,17 @@ public class PresentGiver extends Machine {
         stand.getEquipment().setChestplate(chestplate);
         stand.getEquipment().setLeggings(leggings);
         stand.getEquipment().setBoots(boots);
+
+        uniqueId = stand.getUniqueId();
     }
 
     @Override
     public void onInteractAtEntity(PlayerInteractAtEntityEvent event) {
+        final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+        if(stand == null) {
+            return;
+        }
+
         if (event.getRightClicked().equals(stand)) {
             if(Elfhunt.getInstance().getGameManager().getCurrentState() instanceof IngameState state) {
                 state.onGiverClicked(event.getPlayer());
@@ -72,6 +70,10 @@ public class PresentGiver extends Machine {
 
     @Override
     public void destroy() {
+        final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+        if(stand == null) {
+            return;
+        }
         stand.remove();
     }
 }

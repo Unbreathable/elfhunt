@@ -94,11 +94,11 @@ public class ItemShopScreen extends CScreen {
                         .withLore(Component.text("Turrets and traps.", NamedTextColor.GRAY))
                         .buildStack(),
                 List.of(
-                        itemWithPrice(Material.LEATHER_BOOTS, "Slow trap", NamedTextColor.GREEN, 25, 1),
+                        itemWithPrice(Material.GRAY_DYE, "Slow trap", NamedTextColor.GREEN, 25, 1),
                         itemWithPrice(Material.GREEN_DYE, "Poison trap", NamedTextColor.GREEN, 25, 1),
                         itemWithPrice(Material.FEATHER, "Fly trap", NamedTextColor.GREEN, 25, 1),
                         itemWithPrice(Material.LIGHT_BLUE_DYE, "Freeze trap", NamedTextColor.GREEN, 35, 1),
-                        itemWithPrice(Material.STRING, "Web trap", NamedTextColor.GREEN, 35, 1)
+                        itemWithPrice(Material.WHITE_DYE, "Web trap", NamedTextColor.GREEN, 35, 1)
                 )
         ),
         TOOLS(

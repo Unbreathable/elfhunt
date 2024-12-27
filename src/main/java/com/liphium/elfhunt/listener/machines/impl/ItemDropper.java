@@ -1,21 +1,20 @@
 package com.liphium.elfhunt.listener.machines.impl;
 
-import com.liphium.core.util.ItemStackBuilder;
 import com.liphium.elfhunt.listener.machines.Machine;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Color;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
+import java.util.UUID;
+
 public class ItemDropper extends Machine {
 
-    private final ArmorStand stand;
+    private UUID uniqueId;
     private final String name;
     private final NamedTextColor color;
     private final ItemStack toDrop;
@@ -28,8 +27,9 @@ public class ItemDropper extends Machine {
         this.color = color;
         this.toDrop = toDrop;
         this.dropRate = ticks;
+        count = ticks;
 
-        stand = location.getWorld().spawn(location.clone().add(0.5, -0.5, 0.5), ArmorStand.class);
+        ArmorStand stand = location.getWorld().spawn(location.clone().add(0.5, -0.5, 0.5), ArmorStand.class);
 
         stand.setCustomNameVisible(true);
         stand.customName(Component.text(name, color).appendSpace()
@@ -38,22 +38,29 @@ public class ItemDropper extends Machine {
         stand.setInvisible(true);
         stand.setInvulnerable(true);
         stand.setRemoveWhenFarAway(false);
-        count = ticks;
+
+        uniqueId = stand.getUniqueId();
     }
 
     int count = 10, tickCount = 0;
 
     @Override
     public void tick() {
-        if (broken) return;
-
+        if (broken) {
+            return;
+        }
         if (tickCount++ >= 20) {
             tickCount = 0;
+
+            final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+            if(stand == null) {
+                return;
+            }
 
             count--;
             stand.customName(Component.text(name, color).appendSpace()
                     .append(Component.text("in", NamedTextColor.GRAY)).appendSpace()
-                    .append(Component.text(count, NamedTextColor.RED, TextDecoration.BOLD)).appendSpace()
+                    .append(Component.text(count, color, TextDecoration.BOLD)).appendSpace()
                     .append(Component.text("..", NamedTextColor.GRAY))
             );
 
@@ -65,9 +72,13 @@ public class ItemDropper extends Machine {
             }
         }
     }
-    
+
     @Override
     public void destroy() {
+        final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
+        if(stand == null) {
+            return;
+        }
         stand.remove();
     }
 }
