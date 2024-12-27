@@ -89,7 +89,7 @@ public class MachineManager {
             case Material.CYAN_CONCRETE ->  new ItemDropper(location, "Diamond", NamedTextColor.AQUA, new ItemStack(Material.DIAMOND), 30);
             case Material.RED_CONCRETE ->  new ItemDropper(location, "Redstone", NamedTextColor.RED, new ItemStack(Material.REDSTONE), 10);
             case Material.DISPENSER ->  new ItemDropper(location, "Dropper", NamedTextColor.YELLOW, new ItemStack(Material.DROPPER), 60);
-            case Material.TARGET ->  new ItemDropper(location, "Arrow", NamedTextColor.RED, new ItemStack(Material.DROPPER), 60);
+            case Material.TARGET ->  new ItemDropper(location, "Arrow", NamedTextColor.RED, new ItemStack(Material.ARROW), 60);
             case Material.BEACON ->  new ItemDropper(location, "Golden apple", NamedTextColor.GOLD, new ItemStack(Material.GOLDEN_APPLE), 30);
             case Material.REDSTONE_LAMP -> new RocketDropper(location);
             case Material.BREWING_STAND -> new Brewer(location);

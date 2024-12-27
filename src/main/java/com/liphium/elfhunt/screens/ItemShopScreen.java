@@ -94,9 +94,11 @@ public class ItemShopScreen extends CScreen {
                         .withLore(Component.text("Turrets and traps.", NamedTextColor.GRAY))
                         .buildStack(),
                 List.of(
-                        itemWithPrice(Material.TNT_MINECART, "TNT trap", NamedTextColor.GREEN, 25, 1),
-                        itemWithPrice(Material.TRIPWIRE_HOOK, "Slow trap", NamedTextColor.GREEN, 25, 1),
-                        itemWithPrice(Material.VINE, "Poison trap", NamedTextColor.GREEN, 25, 1)
+                        itemWithPrice(Material.LEATHER_BOOTS, "Slow trap", NamedTextColor.GREEN, 25, 1),
+                        itemWithPrice(Material.GREEN_DYE, "Poison trap", NamedTextColor.GREEN, 25, 1),
+                        itemWithPrice(Material.FEATHER, "Fly trap", NamedTextColor.GREEN, 25, 1),
+                        itemWithPrice(Material.LIGHT_BLUE_DYE, "Freeze trap", NamedTextColor.GREEN, 35, 1),
+                        itemWithPrice(Material.STRING, "Web trap", NamedTextColor.GREEN, 35, 1)
                 )
         ),
         TOOLS(
@@ -140,7 +142,8 @@ public class ItemShopScreen extends CScreen {
                         itemWithPrice(Material.COBBLESTONE, "Cobblestone", NamedTextColor.WHITE, 8, 16),
                         spacer(),
                         itemWithPrice(Material.IRON_INGOT, "Iron", NamedTextColor.WHITE, 4, 1),
-                        itemWithPrice(Material.DIAMOND, "Diamond", NamedTextColor.WHITE, 7, 1)
+                        itemWithPrice(Material.DIAMOND, "Diamond", NamedTextColor.WHITE, 7, 1),
+                        itemWithPrice(Material.GOLDEN_APPLE, "Golden apple", NamedTextColor.WHITE, 10, 1)
                 )
         ),
         DROPPER(

@@ -71,7 +71,8 @@ public class GameListener implements Listener {
                 || event.getEntityType().equals(EntityType.AREA_EFFECT_CLOUD)
                 || event.getEntityType().equals(EntityType.WIND_CHARGE)
                 || event.getEntityType().equals(EntityType.BREEZE_WIND_CHARGE)
-                || event.getEntityType().equals(EntityType.TNT)) {
+                || event.getEntityType().equals(EntityType.TNT)
+                || event.getEntityType().equals(EntityType.ARROW)) {
             Elfhunt.getInstance().getGameManager().getCurrentState().onSpawn(event);
             return;
         }

@@ -14,6 +14,7 @@ import com.liphium.elfhunt.util.Messages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -126,7 +127,8 @@ public class IngameState extends GameState {
     @Override
     public void onSpawn(EntitySpawnEvent event) {
         if (event.getEntityType().equals(EntityType.WIND_CHARGE) || event.getEntityType().equals(EntityType.BREEZE_WIND_CHARGE)
-                || event.getEntityType().equals(EntityType.BOAT) || event.getEntityType().equals(EntityType.TNT)) {
+                || event.getEntityType().equals(EntityType.BOAT) || event.getEntityType().equals(EntityType.TNT)
+                || event.getEntityType().equals(EntityType.ARROW)) {
             return;
         }
         if (event.getEntityType() == EntityType.ARMOR_STAND && placeItemShop) {
@@ -151,14 +153,20 @@ public class IngameState extends GameState {
         if (event.getItem() != null) {
             Team team = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(event.getPlayer());
             ItemStack usedItem = event.getItem();
-            if (usedItem.getType().equals(Material.TRIPWIRE_HOOK) && event.getClickedBlock() != null) {
+            if (usedItem.getType().equals(Material.LEATHER_BOOTS) && event.getClickedBlock() != null) {
                 traps.add(new SlowTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
                 reduceMainHandItem(event.getPlayer());
-            } else if (usedItem.getType().equals(Material.VINE) && event.getClickedBlock() != null) {
+            } else if (usedItem.getType().equals(Material.GREEN_DYE) && event.getClickedBlock() != null) {
                 traps.add(new PoisonTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
                 reduceMainHandItem(event.getPlayer());
-            } else if (usedItem.getType().equals(Material.TNT_MINECART) && event.getClickedBlock() != null) {
-                traps.add(new TNTTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
+            } else if (usedItem.getType().equals(Material.FEATHER) && event.getClickedBlock() != null) {
+                traps.add(new FlyTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
+                reduceMainHandItem(event.getPlayer());
+            } else if (usedItem.getType().equals(Material.LIGHT_BLUE_DYE) && event.getClickedBlock() != null) {
+                traps.add(new FreezeTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
+                reduceMainHandItem(event.getPlayer());
+            }  else if (usedItem.getType().equals(Material.STRING) && event.getClickedBlock() != null) {
+                traps.add(new WebTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
                 reduceMainHandItem(event.getPlayer());
             } else if (usedItem.getType().equals(Material.FEATHER) && event.getPlayer().getCooldown(Material.FEATHER) <= 0) {
                 event.getPlayer().setVelocity(event.getPlayer().getLocation().getDirection().normalize().multiply(event.getPlayer().isOnGround() ? 1.8 : 1.1));
@@ -268,6 +276,13 @@ public class IngameState extends GameState {
         if (event.getPlayer().getGameMode() == GameMode.SPECTATOR) {
             return;
         }
+
+        // Kill the player in case they fell down
+        if(event.getPlayer().getLocation().getY() <= 180) {
+            event.getPlayer().setHealth(0);
+            return;
+        }
+
         Team team = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam(event.getPlayer());
 
         // Check if they wandered into a trap
@@ -327,7 +342,7 @@ public class IngameState extends GameState {
             Material.AZURE_BLUET, Material.RED_TULIP, Material.ORANGE_TULIP,
             Material.WHITE_TULIP, Material.PINK_TULIP, Material.OXEYE_DAISY, Material.SUNFLOWER,
             Material.LILAC, Material.ROSE_BUSH, Material.PEONY,
-            Material.LILY_OF_THE_VALLEY, Material.WITHER_ROSE
+            Material.LILY_OF_THE_VALLEY, Material.WITHER_ROSE, Material.COBWEB
     );
 
     @Override
@@ -439,21 +454,6 @@ public class IngameState extends GameState {
         public abstract void onEnter(Player player);
     }
 
-    public static class TNTTrap extends DroppableTrap {
-
-        TNTTrap(Location location, Team team) {
-            super(location, team, Material.TNT_MINECART);
-        }
-
-        @Override
-        public void onEnter(Player player) {
-            final var tnt = (TNTPrimed) location.getWorld().spawnEntity(location.clone().add(0, 1, 0), EntityType.TNT);
-            tnt.setFuseTicks(10);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 50, 4));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
-        }
-    }
-
     public static class SlowTrap extends DroppableTrap {
 
         SlowTrap(Location location, Team team) {
@@ -477,6 +477,49 @@ public class IngameState extends GameState {
         public void onEnter(Player player) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 300, 2));
             player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
+        }
+    }
+
+    public static class FreezeTrap extends DroppableTrap {
+
+        FreezeTrap(Location location, Team team) {
+            super(location, team, Material.BLUE_ICE);
+        }
+
+        @Override
+        public void onEnter(Player player) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100, 255, true, false));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, 128, true, false));
+        }
+    }
+
+    public static class FlyTrap extends DroppableTrap {
+
+        FlyTrap(Location location, Team team) {
+            super(location, team, Material.SCAFFOLDING);
+        }
+
+        @Override
+        public void onEnter(Player player) {
+            player.setVelocity(new Vector(0, 5, 0));
+        }
+    }
+
+    public static class WebTrap extends DroppableTrap {
+
+        WebTrap(Location location, Team team) {
+            super(location, team, Material.COBWEB);
+        }
+
+        @Override
+        public void onEnter(Player player) {
+            // Place 5 blocks of webs around the location
+            final var main = location.clone().getBlock();
+            main.setType(Material.COBWEB);
+            main.getRelative(BlockFace.EAST).setType(Material.COBWEB);
+            main.getRelative(BlockFace.WEST).setType(Material.COBWEB);
+            main.getRelative(BlockFace.NORTH).setType(Material.COBWEB);
+            main.getRelative(BlockFace.SOUTH).setType(Material.COBWEB);
         }
     }
 }
