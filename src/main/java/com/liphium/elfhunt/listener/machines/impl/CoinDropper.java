@@ -40,7 +40,7 @@ public class CoinDropper extends Machine {
         stand.setRemoveWhenFarAway(false);
     }
 
-    int count = 20, tickCount = 0;
+    int count = 2, tickCount = 0;
 
     @Override
     public void destroy() {

@@ -26,14 +26,6 @@ public class HunterTeam extends Team {
 
     @Override
     public void giveKit(Player player, boolean teleport) {
-        player.getInventory().setHelmet(new ItemStackBuilder(Material.NETHERITE_HELMET).makeUnbreakable()
-                .addEnchantment(Enchantment.PROTECTION, 3).buildStack());
-
-        player.getInventory().setBoots(new ItemStackBuilder(Material.LEATHER_BOOTS).makeUnbreakable()
-                .withLeatherColor(Color.RED).buildStack());
-
-        player.getInventory().addItem(new ItemStackBuilder(Material.STONE_SWORD).makeUnbreakable().buildStack());
-
         if (teleport) {
             player.teleport(Objects.requireNonNull(LocationAPI.getLocation("Hunters")));
         }

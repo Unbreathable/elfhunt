@@ -7,7 +7,6 @@ import com.liphium.elfhunt.game.team.Team;
 import com.liphium.elfhunt.game.team.impl.ElfTeam;
 import com.liphium.elfhunt.game.team.impl.HunterTeam;
 import com.liphium.elfhunt.listener.machines.impl.PresentReceiver;
-import com.liphium.elfhunt.screens.ItemShopScreen;
 import com.liphium.elfhunt.util.LocationAPI;
 import com.liphium.elfhunt.util.Messages;
 import net.kyori.adventure.text.Component;
@@ -54,7 +53,7 @@ public class IngameState extends GameState {
 
         // Change the amount of presents based on team size
         final var hunterSize = Elfhunt.getInstance().getGameManager().getTeamManager().getTeam("Elves").getPlayers().size();
-        int maxPresents = hunterSize * 10; // 10 per member of the team seems fine for 15 minutes
+        int maxPresents = hunterSize * 4; // 4 per member of the team seems fine for 15 minutes
         presentsLeft = maxPresents;
 
         // Give every single present receiver a random name
@@ -133,32 +132,35 @@ public class IngameState extends GameState {
             ItemStack usedItem = event.getItem();
             if (usedItem.getType().equals(Material.GRAY_DYE) && event.getClickedBlock() != null) {
                 traps.add(new SlowTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
-                reduceMainHandItem(event.getPlayer());
+                reduceMainHandItem(event.getPlayer(), Material.GRAY_DYE);
             } else if (usedItem.getType().equals(Material.GREEN_DYE) && event.getClickedBlock() != null) {
                 traps.add(new PoisonTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
-                reduceMainHandItem(event.getPlayer());
+                reduceMainHandItem(event.getPlayer(), Material.GREEN_DYE);
             } else if (usedItem.getType().equals(Material.FEATHER) && event.getClickedBlock() != null) {
                 traps.add(new FlyTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
-                reduceMainHandItem(event.getPlayer());
+                reduceMainHandItem(event.getPlayer(), Material.FEATHER);
             } else if (usedItem.getType().equals(Material.LIGHT_BLUE_DYE) && event.getClickedBlock() != null) {
                 traps.add(new FreezeTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
-                reduceMainHandItem(event.getPlayer());
+                reduceMainHandItem(event.getPlayer(), Material.LIGHT_BLUE_DYE);
             }  else if (usedItem.getType().equals(Material.WHITE_DYE) && event.getClickedBlock() != null) {
                 traps.add(new WebTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
-                reduceMainHandItem(event.getPlayer());
-            } else if (usedItem.getType().equals(Material.FEATHER) && event.getPlayer().getCooldown(Material.FEATHER) <= 0) {
-                event.getPlayer().setVelocity(event.getPlayer().getLocation().getDirection().normalize().multiply(event.getPlayer().isOnGround() ? 1.8 : 1.1));
-                event.getPlayer().setCooldown(Material.FEATHER, 50);
-                ItemShopScreen.removeAmountFromInventory(event.getPlayer(), Material.FEATHER, 1);
+                reduceMainHandItem(event.getPlayer(), Material.WHITE_DYE);
             }
         }
     }
 
-    void reduceMainHandItem(Player player) {
-        int amount = player.getInventory().getItemInMainHand().getAmount();
-        if (amount == 1) {
-            player.getInventory().setItemInMainHand(null);
-        } else player.getInventory().getItemInMainHand().setAmount(amount - 1);
+    void reduceMainHandItem(Player player, Material material) {
+        if(player.getInventory().getItemInMainHand().getType() == material) {
+            int amount = player.getInventory().getItemInMainHand().getAmount();
+            if (amount == 1) {
+                player.getInventory().setItemInMainHand(null);
+            } else player.getInventory().getItemInMainHand().setAmount(amount - 1);
+        } else if(player.getInventory().getItemInOffHand().getType() == material) {
+            int amount = player.getInventory().getItemInOffHand().getAmount();
+            if (amount == 1) {
+                player.getInventory().setItemInOffHand(null);
+            } else player.getInventory().getItemInOffHand().setAmount(amount - 1);
+        }
     }
 
     @Override
@@ -255,7 +257,7 @@ public class IngameState extends GameState {
         }
 
         // Kill the player in case they fell down
-        if(event.getPlayer().getLocation().getY() <= 180) {
+        if(event.getPlayer().getLocation().getY() <= 156) {
             event.getPlayer().setHealth(0);
             return;
         }
@@ -302,9 +304,17 @@ public class IngameState extends GameState {
             return;
         }
 
-        if(event.getBlockPlaced().getLocation().getY() >= 220) {
+        if(event.getBlockPlaced().getLocation().getY() >= 250) {
             event.setCancelled(true);
             return;
+        }
+
+        for(DroppableTrap trap : traps) {
+            if(trap.location.distance(event.getBlock().getLocation()) <= 2) {
+                event.getPlayer().sendMessage(Component.text("You can't place a block near a trap!", NamedTextColor.RED));
+                event.setCancelled(true);
+                return;
+            }
         }
 
         // Place a machine if it is one
@@ -324,7 +334,8 @@ public class IngameState extends GameState {
             Material.AZURE_BLUET, Material.RED_TULIP, Material.ORANGE_TULIP,
             Material.WHITE_TULIP, Material.PINK_TULIP, Material.OXEYE_DAISY, Material.SUNFLOWER,
             Material.LILAC, Material.ROSE_BUSH, Material.PEONY,
-            Material.LILY_OF_THE_VALLEY, Material.WITHER_ROSE, Material.COBWEB
+            Material.LILY_OF_THE_VALLEY, Material.WITHER_ROSE, Material.COBWEB,
+            Material.FERN, Material.SWEET_BERRY_BUSH
     );
 
     @Override
@@ -354,7 +365,11 @@ public class IngameState extends GameState {
     public void onDeath(PlayerDeathEvent event) {
         final var player = event.getPlayer();
 
-        event.setKeepInventory(true);
+        player.getInventory().clear();
+        player.getInventory().setBoots(null);
+        player.getInventory().setLeggings(null);
+        player.getInventory().setChestplate(null);
+        player.getInventory().setHelmet(null);
         event.deathMessage(null);
         event.setKeepLevel(true);
 
@@ -390,7 +405,6 @@ public class IngameState extends GameState {
         } else {
             event.setRespawnLocation(Objects.requireNonNull(LocationAPI.getLocation("Elves")));
         }
-        team.giveKit(event.getPlayer(), false);
     }
 
     public void handleWin(Team team) {
@@ -424,7 +438,7 @@ public class IngameState extends GameState {
             this.location = location;
             this.team = team;
 
-            item = (Item) location.getWorld().spawnEntity(location.clone().add(0, 1, 0), EntityType.ITEM);
+            item = (Item) location.getWorld().spawnEntity(location.clone().add(0, 0.5, 0), EntityType.ITEM);
             item.setItemStack(new ItemStackBuilder(material).buildStack());
             item.setVelocity(new Vector(0, 0, 0));
             item.setPickupDelay(1000000000);
@@ -472,7 +486,6 @@ public class IngameState extends GameState {
         @Override
         public void onEnter(Player player) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100, 255, true, false));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, 128, true, false));
             player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
         }
     }

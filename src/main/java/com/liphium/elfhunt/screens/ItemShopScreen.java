@@ -77,10 +77,10 @@ public class ItemShopScreen extends CScreen {
                         itemWithPriceCustom(new ItemStackBuilder(Material.BOW)
                                 .withName(Component.text("More Punch Bow", NamedTextColor.RED))
                                 .withEnchantments(Map.of(Enchantment.PUNCH, 2, Enchantment.INFINITY, 1))
-                                .buildStack(), 40
+                                .buildStack(), 100
                         ),
                         itemWithPrice(Material.ARROW, "Arrow", NamedTextColor.RED, 15, 3),
-                        itemWithPrice(Material.BOW, "Crossbow", NamedTextColor.RED, 20, 1),
+                        itemWithPrice(Material.CROSSBOW, "Crossbow", NamedTextColor.RED, 50, 1),
                         itemWithPriceCustom(new ItemStackBuilder(Material.FIREWORK_ROCKET)
                                 .withName(Component.text("Rocket", NamedTextColor.RED))
                                 .withAmount(3)
@@ -96,9 +96,8 @@ public class ItemShopScreen extends CScreen {
                 List.of(
                         itemWithPrice(Material.GRAY_DYE, "Slow trap", NamedTextColor.GREEN, 25, 1),
                         itemWithPrice(Material.GREEN_DYE, "Poison trap", NamedTextColor.GREEN, 25, 1),
-                        itemWithPrice(Material.FEATHER, "Fly trap", NamedTextColor.GREEN, 25, 1),
-                        itemWithPrice(Material.LIGHT_BLUE_DYE, "Freeze trap", NamedTextColor.GREEN, 35, 1),
-                        itemWithPrice(Material.WHITE_DYE, "Web trap", NamedTextColor.GREEN, 35, 1)
+                        itemWithPrice(Material.WHITE_DYE, "Web trap", NamedTextColor.GREEN, 35, 1),
+                        itemWithPrice(Material.LIGHT_BLUE_DYE, "Freeze trap", NamedTextColor.GREEN, 35, 1)
                 )
         ),
         TOOLS(
@@ -140,6 +139,7 @@ public class ItemShopScreen extends CScreen {
                         itemWithPrice(Material.SNOW_BLOCK, "Snow", NamedTextColor.WHITE, 4, 16),
                         itemWithPrice(Material.SPRUCE_LOG, "Spruce wood", NamedTextColor.WHITE, 8, 4),
                         itemWithPrice(Material.COBBLESTONE, "Cobblestone", NamedTextColor.WHITE, 8, 16),
+                        itemWithPrice(Material.COBWEB, "Cobweb", NamedTextColor.WHITE, 10, 1),
                         spacer(),
                         itemWithPrice(Material.IRON_INGOT, "Iron", NamedTextColor.WHITE, 4, 1),
                         itemWithPrice(Material.DIAMOND, "Diamond", NamedTextColor.WHITE, 7, 1),
@@ -152,7 +152,7 @@ public class ItemShopScreen extends CScreen {
                         .withLore(Component.text("Coin and material droppers.", NamedTextColor.GRAY))
                         .buildStack(),
                 List.of(
-                        itemWithPrice(Material.GOLD_ORE, "Coin dropper", NamedTextColor.GOLD, 15, 1),
+                        itemWithPrice(Material.GOLD_ORE, "Coin dropper", NamedTextColor.GOLD, 35, 1),
                         itemWithPrice(Material.WHITE_CONCRETE, "Iron dropper", NamedTextColor.GOLD, 20, 1),
                         itemWithPrice(Material.RED_CONCRETE, "Redstone dropper", NamedTextColor.GOLD, 20, 1),
                         itemWithPrice(Material.CYAN_CONCRETE, "Diamond dropper", NamedTextColor.GOLD, 30, 1),

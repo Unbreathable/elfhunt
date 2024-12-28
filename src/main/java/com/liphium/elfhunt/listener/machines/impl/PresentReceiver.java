@@ -26,7 +26,8 @@ public class PresentReceiver extends Machine {
             "Atlas", "Animo", "Louis", "Liph", "Ritso", "Glaze", "Jumbo",
             "JuliPvP99", "Night", "Maya", "Theo", "Prime", "Lofi Girl", "Alex",
             "Steve", "Arch", "Colin", "Dani", "Dave", "David", "Eric", "Lofi Boy",
-            "Matt", "Elon Musk", "Linus LTT", "Neko"
+            "Matt", "Elon Musk", "Linus LTT", "Neko", "Ben Dover", "CD", "CI/CD",
+            "Maja"
     ));
 
     /**
